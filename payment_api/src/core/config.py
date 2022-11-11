@@ -8,7 +8,7 @@ class PostgresSettings(BaseSettings):
     password: str = 'password'
     host: str = 'localhost'
     port: int = 5432
-    db: str = 'movies'
+    db: str = 'payments'
 
     @property
     def dsn(self):
