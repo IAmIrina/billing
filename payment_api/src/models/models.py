@@ -11,4 +11,5 @@ class Payment(Base):
     user_id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False, index=True)
     start_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
     end_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
-    subscription_type = sqlalchemy.Column(sqlalchemy.String)
+    subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
+    payment_url = sqlalchemy.Column(sqlalchemy.String)

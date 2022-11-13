@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     uvicorn_reload: bool = True
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
+    jwt_secret: str = 'secret'
+    jwt_algorithm: str = 'HS256'
 
     class Config:
         env_file = '.env'
