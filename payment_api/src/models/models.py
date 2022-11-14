@@ -13,3 +13,4 @@ class Payment(Base):
     end_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
     subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
     payment_url = sqlalchemy.Column(sqlalchemy.String)
+    is_paid = sqlalchemy.Column(sqlalchemy.Boolean, index=True, default=False)
