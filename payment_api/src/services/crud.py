@@ -15,11 +15,25 @@ async def get_payment(session: AsyncSession, **kwargs):
     return result.scalars().first()
 
 
+async def get_paid_payments(session: AsyncSession, offset=1, limit=1, **kwargs):
+    result = await session.execute(
+        select(models.Payment)
+        .where(
+            models.Payment.user_id == kwargs['user_id'],
+            models.Payment.is_paid,
+        )
+        .offset(offset*limit)
+        .limit(limit)
+        .order_by(models.Payment.id)
+    )
+    return result.scalars().all()
+
+
 async def create_payment(session: AsyncSession, user_payment: schemas.UserPayment):
     db_payment = models.Payment(
         user_id=user_payment.user_id,
         start_date=user_payment.start_date,
-        end_date=user_payment.start_date + relativedelta(months=1,days=-1),
+        end_date=user_payment.start_date + relativedelta(months=1, days=-1),
         subscription=user_payment.subscription.name,
         payment_url=user_payment.payment_url,
     )

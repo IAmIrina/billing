@@ -21,6 +21,20 @@ class Payment(BaseModel):
     start_date: date
 
 
+class PaymentOut(Payment):
+    end_date: date
+
+
+class Pagination(BaseModel):
+    per_page: int
+    page: int
+
+
+class PaymentOutSchema(BaseModel):
+    meta: Pagination
+    data: list[PaymentOut]
+
+
 class PaymentUrl(BaseModel):
     payment_url: HttpUrl
 
