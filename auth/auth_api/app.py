@@ -91,8 +91,8 @@ def before_request():
 
 
 # Конфигурируем и добавляем трейсер
-configure_tracer()
-FlaskInstrumentor().instrument_app(app)
+# configure_tracer()
+# FlaskInstrumentor().instrument_app(app)
 
 
 @app.cli.command("create-superuser")
