@@ -13,14 +13,14 @@ SUPERUSER_ROLE_NAME=SUPERUSER
 LIMITER_CONFIG=5 per 1 minute
 
 # Redis Settings
-REDIS_HOST=redis
+REDIS_HOST=auth_redis
 REDIS_PORT=6379
 
 # Postgres Settings
 POSTGRES_USER=auth
 POSTGRES_PASSWORD=123qwe
 POSTGRES_DB=users_database
-POSTGRES_HOST=db
+POSTGRES_HOST=auth_db
 POSTGRES_PORT=5432
 
 # Postgres Settings for tests
