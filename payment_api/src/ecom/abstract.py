@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
+from schema.payment import PaymentEvent
 from schema.product import Product
 
 
@@ -58,5 +59,18 @@ class EcomClient(ABC):
 
             Returns:
                 str: Customer id in merchant.
+        """
+        pass
+
+
+class EcomEventParser(ABC):
+    async def parse(self, payload: bytes, headers: dict) -> PaymentEvent:
+        """Parse webhook event.
+            Args:
+                payload: Event payload.
+                headers: Event headers.
+
+            Returns:
+                PaymentEvent: Object that represent parsed webhook event.
         """
         pass
