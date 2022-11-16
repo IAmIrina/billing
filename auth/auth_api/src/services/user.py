@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from src.db.pg_db import db
-from src.models.models import User, AuthHistory, UsersRoles, Role
+from flask import current_app
 from src.core.utils import useragent_device_parser
+from src.db.pg_db import db
+from src.models.models import AuthHistory, Role, User, UsersRoles
 
 
 def create_user_in_db(**kwargs):
@@ -65,6 +66,9 @@ def remove_role_from_user(user, role):
 
 
 def get_actual_user_roles(user):
+    user_roles = [role.name for role in user.roles]
+    if current_app.config['SUPERUSER_ROLE_NAME'] in user_roles:
+        return user.roles
     user_roles = db.session.query(UsersRoles.id,
                                   Role.name).filter(UsersRoles.user_id == user.id,
                                                     UsersRoles.expired_at >= datetime.utcnow()).outerjoin(Role)
