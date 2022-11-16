@@ -1,6 +1,11 @@
 import os
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, SecretStr
+
+
+class DotEnvMixin(BaseSettings):
+    class Config:
+        env_file = '.env'
 
 
 class PostgresSettings(BaseSettings):
@@ -18,7 +23,23 @@ class PostgresSettings(BaseSettings):
         env_prefix = "POSTGRES_"
 
 
-class Settings(BaseSettings):
+class PaymentSettings(DotEnvMixin):
+    method_types: list
+    session_expires_in: int
+
+    class Config:
+        env_prefix = 'payment_'
+
+
+class StripeSecrets(DotEnvMixin):
+    secret_key: SecretStr
+    endpoint_secret: SecretStr
+
+    class Config:
+        env_prefix = 'stripe_'
+
+
+class Settings(DotEnvMixin):
     uvicorn_reload: bool = True
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
@@ -26,9 +47,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = 'HS256'
 
     class Config:
-        env_file = '.env'
         env_file_encoding = 'utf-8'
         use_enum_values = True
+
+    debug: bool = False
+    secret_key: str = 'S#perS3crEt_9999'
+    server_address: str = 'http://localhost:8000/'
+    stripe: StripeSecrets = StripeSecrets()
+    payment: PaymentSettings = PaymentSettings()
 
 
 settings = Settings()
