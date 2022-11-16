@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -5,10 +6,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1 import schemas
 from api.v1.paginator import Paginator
+from core.config import settings
 from db.postgres import get_db
+from ecom.abstract import EcomClient
+# TODO сделать получение клиента из абстрактного класса
+from ecom.stripe_api import get_client
+from schema.product import Product, ProductData
 from services.auth import JWTBearer
 from services import crud
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -16,6 +23,7 @@ router = APIRouter()
 async def create_payment(
         payment: schemas.Payment,
         user: schemas.User = Depends(JWTBearer()),
+        payment_system_client: EcomClient = Depends(get_client),
         session: AsyncSession = Depends(get_db)
 ):
     """
@@ -31,14 +39,27 @@ async def create_payment(
         subscription=payment.subscription.name,
         start_date=payment.start_date
     )
-
+    # TODO вернуть ссылку на оплату если оплаты еще не было
     if db_payment:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Payment already registered")
+    # TODO достать из базы цену, название и описание подписки
+    product = Product(
+        unit_amount=100,
+        currency='usd',
+        product_data=ProductData(name=payment.subscription.name, description='...')
+    )
+    domain_url = settings.server_address
+    prefix = router.prefix
 
     try:
-        # TODO заменить на получение адреса из сервиса
-        payment_url = 'https://pydantic-docs.helpmanual.io/usage/types/#standard-library-types'
-    except:
+        session_id, payment_intent_id, payment_url = await payment_system_client.create_checkout_session(
+            product=product,
+            success_redirect=domain_url + prefix + "/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_redirect=domain_url + prefix + "/cancelled",
+        )
+        logger.info('create payment session ', session_id, 'session_url', payment_url)
+    except Exception as e:
+        logger.error(e)
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Error while getting payment link")
 
     user_payment = schemas.UserPayment(
@@ -46,6 +67,7 @@ async def create_payment(
         payment_url=payment_url,
         **payment.dict()
     )
+    # TODO записать в базу ид сессии и ссылку на оплату
     await crud.create_payment(session, user_payment)
 
     return schemas.PaymentUrl(payment_url=payment_url)

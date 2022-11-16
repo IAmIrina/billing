@@ -46,15 +46,15 @@ class Settings(DotEnvMixin):
     jwt_secret: str = 'secret'
     jwt_algorithm: str = 'HS256'
 
-    class Config:
-        env_file_encoding = 'utf-8'
-        use_enum_values = True
-
     debug: bool = False
     secret_key: str = 'S#perS3crEt_9999'
     server_address: str = 'http://localhost:8000/'
     stripe: StripeSecrets = StripeSecrets()
     payment: PaymentSettings = PaymentSettings()
+
+    class Config:
+        env_file_encoding = 'utf-8'
+        use_enum_values = True
 
 
 settings = Settings()

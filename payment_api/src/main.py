@@ -4,6 +4,7 @@ from fastapi.responses import ORJSONResponse
 
 from api.v1 import payments
 from core.config import settings
+from ecom import stripe_api
 
 app = FastAPI(
     title=settings.project_name,
@@ -15,7 +16,11 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    ...
+    stripe_api.api_client = stripe_api.StripeClient(
+        settings.stripe.secret_key.get_secret_value(),
+        settings.payment.method_types,
+        settings.payment.session_expires_in,
+    )
 
 
 @app.on_event('shutdown')
