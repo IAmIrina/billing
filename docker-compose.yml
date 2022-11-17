@@ -21,5 +21,29 @@ services:
     ports:
       - "8090:8000"
 
+  auth_db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .auth_env
+
+  auth_redis:
+    image: redis:6.0.9
+    restart: on-failure
+
+  auth_api:
+    build: ./auth/auth_api
+    env_file:
+      - .auth_env
+    expose:
+      - "8000"
+    volumes:
+      - /tmp/logs/app/json:/var/log/app
+    depends_on:
+      - auth_redis
+      - auth_db
+
 volumes:
   postgres_volume:
+  postgres_data:
