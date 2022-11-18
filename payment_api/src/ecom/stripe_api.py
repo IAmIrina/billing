@@ -1,7 +1,7 @@
 import logging
 from typing import List, Tuple
 
-import stripe
+from async_stripe import stripe
 
 from ecom.abstract import EcomClient
 from schema.payment import CancelReason, RefundReason
@@ -32,12 +32,13 @@ class StripeClient(EcomClient):
             Returns:
                 str: customer id on ecom side
         """
-        customer = stripe.Customer.create(name=name, email=email, idempotency_key=idempotency_key)
+        customer = await stripe.Customer.create(name=name, email=email, idempotency_key=idempotency_key)
         logger.info('Customer %s created id ', customer.email, customer.id)
         return customer.id
 
     async def _get_customer_payment_method(self, id: str) -> str:
-        methods = stripe.PaymentMethod.list(customer=id, type=self.method_types[0]).data
+        methods = await stripe.PaymentMethod.list(customer=id, type=self.method_types[0])
+        methods = methods.data
         if methods:
             return methods[0].id
         return None
@@ -57,7 +58,7 @@ class StripeClient(EcomClient):
             Returns:
                 str: Payment id, Client secret.
         """
-        intent = stripe.PaymentIntent.create(
+        intent = await stripe.PaymentIntent.create(
             customer=customer_id,
             amount=product.unit_amount,
             currency=product.currency,
@@ -88,7 +89,7 @@ class StripeClient(EcomClient):
                 reason: The reason of cancellation.
                 idempotency_key: Allow to escape duplications.
         """
-        stripe.PaymentIntent.cancel(
+        await stripe.PaymentIntent.cancel(
             payment_intent,
             cancellation_reason=reason,
             idempotency_key=idempotency_key,
@@ -117,7 +118,7 @@ class StripeClient(EcomClient):
                 str: PaymentIntent id.
         """
         payment_method = await self._get_customer_payment_method(id=customer_id)
-        payment = stripe.PaymentIntent.create(
+        payment = await stripe.PaymentIntent.create(
             amount=product.unit_amount,
             currency=product.currency,
             customer=customer_id,
@@ -146,7 +147,7 @@ class StripeClient(EcomClient):
             Returns:
                 str: Cahrge id.
         """
-        refund = stripe.Refund.create(
+        refund = await stripe.Refund.create(
             amount=amount,
             payment_intent=payment_intent,
             reason=reason,
