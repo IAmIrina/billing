@@ -42,12 +42,16 @@ async def create_payment(
     # TODO вернуть ссылку на оплату если оплаты еще не было
     if db_payment:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Payment already registered")
-    # TODO достать из базы цену, название и описание подписки
+
+    subscription = await crud.get_subscription_by_title(session, payment.subscription.name)
+    if not subscription:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Subscription not found")
     product = Product(
-        unit_amount=100,
+        unit_amount=subscription.price,
         currency='usd',
-        product_data=ProductData(name=payment.subscription.name, description='...')
+        product_data=ProductData(name=subscription.title, description=subscription.description)
     )
+
     domain_url = settings.server_address
     prefix = router.prefix
 
