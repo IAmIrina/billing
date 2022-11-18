@@ -22,7 +22,7 @@ async def get_paid_payments(session: AsyncSession, offset=1, limit=1, **kwargs):
             models.Payment.user_id == kwargs['user_id'],
             models.Payment.is_paid,
         )
-        .offset(offset*limit)
+        .offset(offset * limit)
         .limit(limit)
         .order_by(models.Payment.id)
     )
@@ -41,3 +41,33 @@ async def create_payment(session: AsyncSession, user_payment: schemas.UserPaymen
     await session.commit()
     await session.refresh(db_payment)
     return db_payment
+
+
+async def create_subscription(session: AsyncSession, subscription: schemas.SubscriptionIn):
+    db_subscription = models.Subscription(
+        title=subscription.title.name,
+        description=subscription.description,
+        price=subscription.price
+    )
+    session.add(db_subscription)
+    await session.commit()
+    await session.refresh(db_subscription)
+    return db_subscription
+
+
+async def get_subscription_by_title(session: AsyncSession, title):
+    result = await session.execute(
+        select(models.Subscription).where(models.Subscription.title == title)
+    )
+    return result.scalars().first()
+
+
+async def change_subscription(session: AsyncSession, subscription: schemas.SubscriptionIn, title: str):
+    db_subscription = await get_subscription_by_title(session, title)
+    db_subscription.title = title
+    db_subscription.description = subscription.description
+    db_subscription.price = subscription.price
+    session.add(db_subscription)
+    await session.commit()
+    await session.refresh(db_subscription)
+    return db_subscription

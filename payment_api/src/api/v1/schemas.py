@@ -41,3 +41,9 @@ class PaymentUrl(BaseModel):
 
 class UserPayment(Payment, PaymentUrl):
     user_id: UUID
+
+
+class SubscriptionIn(BaseModel):
+    title: Subscription
+    description: str
+    price: int
