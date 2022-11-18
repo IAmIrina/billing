@@ -14,3 +14,12 @@ class Payment(Base):
     subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
     payment_url = sqlalchemy.Column(sqlalchemy.String)
     is_paid = sqlalchemy.Column(sqlalchemy.Boolean, index=True, default=False)
+
+
+class Subscription(Base):
+    __tablename__ = 'subscriptions'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
+    title = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
+    description = sqlalchemy.Column(sqlalchemy.String)
+    price = sqlalchemy.Column(sqlalchemy.Integer)
