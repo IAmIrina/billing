@@ -1,5 +1,3 @@
-"""Ecom models."""
-
 from enum import Enum
 from typing import Union
 
@@ -11,22 +9,17 @@ class RefundReason(Enum):
     fraudulent = 'Fraud'
     requested_by_customer = 'Requested'
 
-    class Config:
-        orm_mode = True
+
+class CancelReason(Enum):
+    duplicate = 'Duplicate'
+    fraudulent = 'Fraud'
+    abandoned = 'Abandoned'
 
 
-class Event(Enum):
-    checkout_session_completed = 'checkout.session.completed'
-    checkout_session_expired = 'checkout.session.expired'
-    charge_refunded = 'charge.refunded'
-
-    class Config:
-        orm_mode = True
-
-
-class CompletedSession(OrjsonModel):
-    session_id: str
+class PaymentIntent(OrjsonModel):
     payment_intent: str
+    customer: str
+    status: str
 
     class Config:
         orm_mode = True
@@ -35,13 +28,16 @@ class CompletedSession(OrjsonModel):
 class RefundedCharge(OrjsonModel):
     charge_id: str
     payment_intent: str
+    status: str
 
 
-class ExpiredSession(OrjsonModel):
-    session_id: str
+class Event(Enum):
+    charge_refunded = 'charge.refunded'
+    payment_intent_canceled = 'payment_intent.canceled'
+    payment_intent_succeeded = 'payment_intent.succeeded'
 
 
 class PaymentEvent(OrjsonModel):
     type: Event
-    data: Union[CompletedSession, ExpiredSession, RefundedCharge]
+    data: Union[PaymentIntent, RefundedCharge]
     row_data: dict
