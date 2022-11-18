@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import current_app
+from sqlalchemy import or_
 from src.core.utils import useragent_device_parser
 from src.db.pg_db import db
 from src.models.models import AuthHistory, Role, User, UsersRoles
@@ -10,6 +11,8 @@ def create_user_in_db(**kwargs):
     user = User(**kwargs)
     db.session.add(user)
     db.session.commit()
+    guest_role = Role.query.filter_by(name='guest').first()
+    add_role_to_user(user, guest_role)
     return user
 
 
@@ -70,6 +73,6 @@ def get_actual_user_roles(user):
     if current_app.config['SUPERUSER_ROLE_NAME'] in user_roles:
         return user.roles
     user_roles = db.session.query(UsersRoles.id,
-                                  Role.name).filter(UsersRoles.user_id == user.id,
-                                                    UsersRoles.expired_at >= datetime.utcnow()).outerjoin(Role)
+                                  Role.name).filter(UsersRoles.user_id == user.id).filter(or_(UsersRoles.expired_at >= datetime.utcnow(),
+                                                                                              UsersRoles.expired_at == None)).outerjoin(Role)
     return user_roles

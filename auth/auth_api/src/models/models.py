@@ -1,19 +1,12 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 from pydantic import BaseModel
 from sqlalchemy import DateTime, UniqueConstraint
-from sqlalchemy.types import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
-
-from src.db.pg_db import db
+from sqlalchemy.types import Enum as SQLEnum
 from src.core.utils import UserDeviceType
-
-# users_roles = db.Table(
-#     'users_roles',
-#     db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('users.id')),
-#     db.Column('role_id', UUID(as_uuid=True), db.ForeignKey('roles.id'))
-# )
+from src.db.pg_db import db
 
 
 class UsersRoles(db.Model):
@@ -22,7 +15,7 @@ class UsersRoles(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
     role_id = db.Column(UUID(as_uuid=True), db.ForeignKey('roles.id'))
-    expired_at = db.Column(DateTime(timezone=True), default=datetime.now(timezone.utc) + timedelta(days=30))
+    expired_at = db.Column(DateTime(timezone=True))
 
 
 def create_partition(target, connection, **kw) -> None:

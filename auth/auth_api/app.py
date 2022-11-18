@@ -1,29 +1,26 @@
 import click
 import sentry_sdk
 from apiflask import APIFlask
+from flask import request
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from flask import request
 from sentry_sdk.integrations.flask import FlaskIntegration
-
 from src.api.v1.auth import auth_route
 from src.api.v1.oauth import oauth_route
 from src.api.v1.roles import roles_route
 from src.api.v1.users import users_route
 from src.core.config import api_settings, sentry_settings
 from src.core.limiters import limiter
-from src.core.oauth import init_oauth
 from src.core.logger import logging
-from src.core.tracers import configure_tracer
-from src.db.pg_db import init_db, db
+from src.core.oauth import init_oauth
+from src.db.pg_db import db, init_db
 from src.db.redis_db import redis_service
-from src.models.models import User, Role
+from src.models.models import Role, User
 from src.services.role import create_role_in_db, get_role_by_name
-from src.services.user import create_user_in_db, add_role_to_user, get_user
+from src.services.user import add_role_to_user, create_user_in_db, get_user
 
 sentry_sdk.init(
     dsn=sentry_settings.dsn,
@@ -106,6 +103,13 @@ def create_superuser(email: str, password: str) -> None:
             {
                 'name': api_settings.superuser_role_name,
                 'description': "This Role exists only for admins"
+            }
+        )
+    if not get_role_by_name(api_settings.guest_role_name):
+        create_role_in_db(
+            {
+                'name': api_settings.guest_role_name,
+                'description': "Guest user role"
             }
         )
 
