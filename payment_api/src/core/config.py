@@ -25,7 +25,6 @@ class PostgresSettings(BaseSettings):
 
 class PaymentSettings(DotEnvMixin):
     method_types: list
-    session_expires_in: int
 
     class Config:
         env_prefix = 'payment_'

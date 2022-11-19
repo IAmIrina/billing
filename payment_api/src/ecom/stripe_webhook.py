@@ -1,4 +1,3 @@
-"""Stripe webhook event parser."""
 import logging
 from typing import Tuple
 
@@ -6,8 +5,7 @@ import orjson
 import stripe
 
 from ecom.abstract import EcomEventParser
-from schema.payment import (CompletedSession, Event, ExpiredSession,
-                            PaymentEvent, RefundedCharge)
+from schema.payment import Event, PaymentEvent, PaymentIntent, RefundedCharge
 
 logger = logging.getLogger(__name__)
 
@@ -20,29 +18,34 @@ class StripeEventParser(EcomEventParser):
     def __init__(self, endpoint_secret: str) -> None:
         self.endpoint_secret = endpoint_secret
 
-    async def _checkout_session_completed(self, event: dict) -> CompletedSession:
-        completed_session_data = CompletedSession(
-            session_id=event.data.object.id,
-            payment_intent=event.data.object.payment_intent
+    async def _parse_payment_intent(self, payment_intent: dict) -> PaymentIntent:
+        intent = PaymentIntent(
+            payment_intent=payment_intent.id,
+            customer=payment_intent.customer,
+            status=payment_intent.status,
         )
-        return completed_session_data
+        return intent
+
+    async def _payment_intent_succeeded(self, event: dict) -> PaymentIntent:
+        return await self._parse_payment_intent(event.data.object)
+
+    async def _payment_intent_canceled(self, event: dict) -> PaymentIntent:
+        return await self._parse_payment_intent(event.data.object)
 
     async def _charge_refunded(self, event: dict) -> RefundedCharge:
         charge = event.data.object
         refunded_charge = RefundedCharge(
             charge_id=charge.id,
             payment_intent=charge.payment_intent,
+            status=charge.status,
         )
         return refunded_charge
-
-    async def _checkout_session_expired(self, event: dict) -> ExpiredSession:
-        return ExpiredSession(session_id=event.data.object.id)
 
     async def _get_event(self, payload: bytes, headers: dict) -> Tuple[str, dict]:
         try:
             stripe_signature = headers['stripe-signature']
         except KeyError as e:
-            logger.warning("Header stripe_signature doesn't exist %s", headers)
+            logger.warning('Header stripe_signature does not exists %s', headers)
             raise e
         try:
             event = stripe.Webhook.construct_event(
