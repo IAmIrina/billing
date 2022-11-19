@@ -23,3 +23,11 @@ class Subscription(Base):
     title = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     description = sqlalchemy.Column(sqlalchemy.String)
     price = sqlalchemy.Column(sqlalchemy.Integer)
+
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id = sqlalchemy.Column(UUID(as_uuid=True), primary_key=True, index=True)
+    payment_system_id = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
+    is_recurrent_payments = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
