@@ -24,7 +24,7 @@ class PostgresSettings(BaseSettings):
 
 
 class PaymentSettings(DotEnvMixin):
-    method_types: list
+    method_types: list = ["card"]
 
     class Config:
         env_prefix = 'payment_'
@@ -33,6 +33,7 @@ class PaymentSettings(DotEnvMixin):
 class StripeSecrets(DotEnvMixin):
     secret_key: SecretStr
     endpoint_secret: SecretStr
+    public_key: SecretStr
 
     class Config:
         env_prefix = 'stripe_'
@@ -42,16 +43,18 @@ class Settings(DotEnvMixin):
     uvicorn_reload: bool = True
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
-
-    class Config:
-        env_file_encoding = 'utf-8'
-        use_enum_values = True
+    jwt_secret: str = 'secret'
+    jwt_algorithm: str = 'HS256'
 
     debug: bool = False
     secret_key: str = 'S#perS3crEt_9999'
     server_address: str = 'http://localhost:8000/'
     stripe: StripeSecrets = StripeSecrets()
     payment: PaymentSettings = PaymentSettings()
+
+    class Config:
+        env_file_encoding = 'utf-8'
+        use_enum_values = True
 
 
 settings = Settings()
