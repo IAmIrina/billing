@@ -5,6 +5,7 @@ from marshmallow.fields import Boolean
 from src.api.v1.schemas import UserIn, UserOut, AuthHistoryOut, RoleName, RoleOut, AuthHistoryQuery
 from src.services import user as user_service, role as role_service
 from src.services.jwt_service import check_role_jwt, auth
+from src.core.config import api_settings
 
 
 users_route = APIBlueprint(
@@ -60,7 +61,7 @@ def get_auth_history(query):
 @users_route.input(RoleName)
 @users_route.output({'result': Boolean()})
 @users_route.auth_required(auth)
-@check_role_jwt('admin')
+@check_role_jwt(api_settings.superuser_role_name)
 def add_role_to_user(user_id, data):
     user = user_service.get_user_or_404(id=user_id)
     role = role_service.get_role_by_name_or_404(data['name'])
@@ -75,7 +76,7 @@ def add_role_to_user(user_id, data):
 @users_route.input(RoleName)
 @users_route.output({'result': Boolean()})
 @users_route.auth_required(auth)
-@check_role_jwt('admin')
+@check_role_jwt(api_settings.superuser_role_name)
 def remove_role_from_user(user_id, data):
     user = user_service.get_user_or_404(id=user_id)
     role = role_service.get_role_by_name_or_404(data['name'])
@@ -89,7 +90,7 @@ def remove_role_from_user(user_id, data):
 @users_route.get('/<user_id>/roles')
 @users_route.output(RoleOut(many=True))
 @users_route.auth_required(auth)
-@check_role_jwt('admin')
+@check_role_jwt(api_settings.superuser_role_name)
 def get_user_roles(user_id):
     user = user_service.get_user_or_404(id=user_id)
     return user.roles
