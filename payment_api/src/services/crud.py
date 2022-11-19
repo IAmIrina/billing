@@ -35,7 +35,9 @@ async def create_payment(session: AsyncSession, user_payment: schemas.UserPaymen
         start_date=user_payment.start_date,
         end_date=user_payment.start_date + relativedelta(months=1, days=-1),
         subscription=user_payment.subscription.name,
-        payment_url=user_payment.payment_url,
+        # payment_url=user_payment.payment_url,
+        client_secret=user_payment.client_secret,
+        intent_id=user_payment.intent_id,
     )
     session.add(db_payment)
     await session.commit()
@@ -71,3 +73,22 @@ async def change_subscription(session: AsyncSession, subscription: schemas.Subsc
     await session.commit()
     await session.refresh(db_subscription)
     return db_subscription
+
+
+async def get_user(session: AsyncSession, user_id):
+    result = await session.execute(
+        select(models.User).where(models.User.id == user_id)
+    )
+    return result.scalars().first()
+
+
+async def create_user(session: AsyncSession, user_id, payment_system_id, is_recurrent_payments):
+    user = models.User(
+        id=user_id,
+        payment_system_id=payment_system_id,
+        is_recurrent_payments=is_recurrent_payments
+    )
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    return user

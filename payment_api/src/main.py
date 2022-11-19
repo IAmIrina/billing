@@ -17,9 +17,9 @@ app = FastAPI(
 @app.on_event('startup')
 async def startup():
     stripe_api.api_client = stripe_api.StripeClient(
-        settings.stripe.secret_key.get_secret_value(),
-        settings.payment.method_types,
-        settings.payment.session_expires_in,
+        secret_key=settings.stripe.secret_key.get_secret_value(),
+        method_types=settings.payment.method_types,
+        public_key=settings.stripe.public_key.get_secret_value(),
     )
 
 

@@ -35,12 +35,14 @@ class PaymentOutSchema(BaseModel):
     data: list[PaymentOut]
 
 
-class PaymentUrl(BaseModel):
-    payment_url: HttpUrl
+class ClientSecret(BaseModel):
+    data: str
 
 
-class UserPayment(Payment, PaymentUrl):
+class UserPayment(Payment):
     user_id: UUID
+    client_secret: str
+    intent_id: str
 
 
 class SubscriptionIn(BaseModel):

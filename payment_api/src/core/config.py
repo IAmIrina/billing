@@ -24,7 +24,7 @@ class PostgresSettings(BaseSettings):
 
 
 class PaymentSettings(DotEnvMixin):
-    method_types: list
+    method_types: list = ["card"]
 
     class Config:
         env_prefix = 'payment_'
@@ -33,6 +33,7 @@ class PaymentSettings(DotEnvMixin):
 class StripeSecrets(DotEnvMixin):
     secret_key: SecretStr
     endpoint_secret: SecretStr
+    public_key: SecretStr
 
     class Config:
         env_prefix = 'stripe_'
