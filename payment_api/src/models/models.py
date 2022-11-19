@@ -14,6 +14,9 @@ class Payment(Base):
     subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
     payment_url = sqlalchemy.Column(sqlalchemy.String)
     is_paid = sqlalchemy.Column(sqlalchemy.Boolean, index=True, default=False)
+    intent_id = sqlalchemy.Column(sqlalchemy.String)
+    client_secret = sqlalchemy.Column(sqlalchemy.String)
+
 
 
 class Subscription(Base):
