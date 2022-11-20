@@ -38,15 +38,14 @@ async def create_payment(
     - **subscription**: subscription title
     - **start_date**: date of start subscription
     """
-    # TODO все обернуть в попытку, добавить проверку что оплаченный период еще не закончился
+
     db_payment = await person_service.get_payment(
         user_id=str(user.id),
         subscription=payment.subscription.name,
         start_date=payment.start_date
     )
-    # TODO вернуть ссылку на оплату если оплаты еще не было
-    # if db_payment:
-    #     raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Payment already registered")
+    if db_payment:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Paid period is not yet over")
 
     subscription = await subscription_service.get_subscription_by_title(payment.subscription.name)
     if not subscription:
