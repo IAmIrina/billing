@@ -1,17 +1,30 @@
+import logging
 from functools import lru_cache
+from http import HTTPStatus
 
 from dateutil.relativedelta import relativedelta
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from api.v1 import schemas
 from db.postgres import get_db
+from ecom.abstract import EcomClient
+# TODO сделать получение клиента из абстрактного класса
+from ecom.stripe_api import get_client
 from models import models
+from schema.product import Product
 from services.base import BaseService
+from services.user import UserService, get_user_service
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentService(BaseService):
+    def __init__(self, session: AsyncSession, payment_system_client: EcomClient, user_service: UserService):
+        super().__init__(session)
+        self.payment_system_client = payment_system_client
+        self.user_service = user_service
 
     async def get_payment(self, user_id, start_date, subscription):
         """Функция ищет оплаченный платеж пользователя по подписке с датой окончания больше,
@@ -54,7 +67,44 @@ class PaymentService(BaseService):
         await self.session.refresh(db_payment)
         return db_payment
 
+    async def add_new_payment(self, payment: schemas.Payment, product: Product, user: schemas.User):
+        db_user = await self.user_service.get_user(user.id)
+        if not db_user:
+            customer_id = await self.payment_system_client.create_customer(
+                # TODO удалить заглушки для имени и почты
+                name='name', email='ya@ya.ru',
+                idempotency_key=str(user.id)
+            )
+            db_user = await self.user_service.create_user(
+                user_id=user.id,
+                payment_system_id=customer_id,
+                is_recurrent_payments=True
+            )
+
+        try:
+            intent_id, client_secret = await self.payment_system_client.create_payment_intent(
+                customer_id=db_user.payment_system_id,
+                product=product,
+            )
+        except Exception as e:
+            logger.error(e)
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Error while getting payment link")
+
+        user_payment = schemas.UserPayment(
+            user_id=user.id,
+            intent_id=intent_id,
+            client_secret=client_secret,
+            **payment.dict()
+        )
+        # TODO записать сумму в базу
+        db_payment = await self.create_payment(user_payment)
+        return db_payment
+
 
 @lru_cache()
-def get_payment_service(session: AsyncSession = Depends(get_db)) -> PaymentService:
-    return PaymentService(session)
+def get_payment_service(
+        session: AsyncSession = Depends(get_db),
+        payment_system_client: EcomClient = Depends(get_client),
+        user_service: UserService = Depends(get_user_service),
+) -> PaymentService:
+    return PaymentService(session, payment_system_client, user_service)
