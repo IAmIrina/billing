@@ -5,7 +5,6 @@ from enum import Enum
 import logging
 
 import aiohttp
-import asyncio
 
 
 class HttpMethod(Enum):
