@@ -13,19 +13,24 @@ from services.base import BaseService
 
 class PaymentService(BaseService):
 
-    async def get_payment(self, **kwargs):
+    async def get_payment(self, user_id, start_date, subscription):
+        """Функция ищет оплаченный платеж пользователя по подписке с датой окончания больше,
+         чем дата старта, указанная в аргументе"""
+
         result = await self.session.execute(select(models.Payment).where(
-            models.Payment.user_id == kwargs['user_id'],
-            models.Payment.start_date == kwargs['start_date'],
-            models.Payment.subscription == kwargs['subscription'],
+            models.Payment.user_id == user_id,
+            start_date < models.Payment.end_date,
+            models.Payment.subscription == subscription,
+            models.Payment.is_paid
         ))
         return result.scalars().first()
 
-    async def get_paid_payments(self, offset=1, limit=1, **kwargs):
+    async def get_paid_payments(self, user_id, offset=1, limit=1, ):
+        """Функция получает все оплаченные платежи пользователя"""
         result = await self.session.execute(
             select(models.Payment)
             .where(
-                models.Payment.user_id == kwargs['user_id'],
+                models.Payment.user_id == user_id,
                 # FIXME закомментировал для отладки
                 # models.Payment.is_paid,
             )
