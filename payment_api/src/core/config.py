@@ -1,6 +1,6 @@
 import os
 
-from pydantic import BaseSettings, SecretStr
+from pydantic import BaseSettings, SecretStr, Field
 
 
 class DotEnvMixin(BaseSettings):
@@ -31,9 +31,9 @@ class PaymentSettings(DotEnvMixin):
 
 
 class StripeSecrets(DotEnvMixin):
-    secret_key: SecretStr
-    endpoint_secret: SecretStr
-    public_key: SecretStr
+    secret_key: SecretStr = 'sk_test_key'
+    endpoint_secret: SecretStr = 'pk_test_51M2zGaEUp1F2G8nCjwz4CIQDmbYMnwQov5GiD4fUbGq0WPN4BMXXrSPOI3GvcFdibmskQTG8UMswD2Yp4iSqWNwK00aCATDahk'
+    public_key: SecretStr = 'whsec_endpoint'
 
     class Config:
         env_prefix = 'stripe_'
