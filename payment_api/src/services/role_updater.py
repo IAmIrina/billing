@@ -1,17 +1,10 @@
 from uuid import UUID
 import datetime as dt
 from http import HTTPStatus
-from enum import Enum
 import logging
+from schema.rest import HttpMethod
 
 import aiohttp
-
-
-class HttpMethod(Enum):
-    """Класс с перечислением методов HHTP запросов"""
-    GET = "GET"
-    POST = "POST"
-    DELETE = "DELETE"
 
 
 class RoleUpdater:

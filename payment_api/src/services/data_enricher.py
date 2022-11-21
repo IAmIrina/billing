@@ -42,6 +42,3 @@ class DataEnricher:
 
         await engine.dispose()
 
-
-
-# res = asyncio.run(async_main())
