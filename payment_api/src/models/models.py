@@ -18,7 +18,6 @@ class Payment(Base):
     client_secret = sqlalchemy.Column(sqlalchemy.String)
 
 
-
 class Subscription(Base):
     __tablename__ = 'subscriptions'
 
