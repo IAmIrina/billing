@@ -38,6 +38,16 @@ class PaymentService(BaseService):
         ))
         return result.scalars().first()
 
+    async def get_payment_by_intent_id(self, user_id, intent_id):
+        """Функция ищет оплаченный платеж пользователя по intent_id"""
+
+        result = await self.session.execute(select(models.Payment).where(
+            models.Payment.user_id == user_id,
+            models.Payment.intent_id == intent_id,
+            models.Payment.is_paid
+        ))
+        return result.scalars().first()
+
     async def get_paid_payments(self, user_id, offset=1, limit=1, ):
         """Функция получает все оплаченные платежи пользователя"""
         result = await self.session.execute(
@@ -99,6 +109,20 @@ class PaymentService(BaseService):
         # TODO записать сумму в базу
         db_payment = await self.create_payment(user_payment)
         return db_payment
+
+    async def add_new_refund(self, payment_intent, idempotency_key, reason, amount=None):
+        try:
+            refund = await self.payment_system_client.refund(
+                payment_intent=payment_intent,
+                amount=amount,
+                reason=reason,
+                idempotency_key=idempotency_key
+            )
+        except Exception as e:
+            logger.error(e)
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Error while refund")
+
+        return refund
 
 
 @lru_cache()

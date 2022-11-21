@@ -49,3 +49,8 @@ class SubscriptionIn(BaseModel):
     title: Subscription
     description: str
     price: int
+
+
+class PaymentIntent(BaseModel):
+    user_id: UUID
+    intent_id: str

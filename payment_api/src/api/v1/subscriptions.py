@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 
 from api.v1 import schemas
-from services.auth import JWTBearer
+from services.auth import JWTBearer, check_role
 from services.subscruption import SubscriptionService, get_subscription_service
 
 logger = logging.getLogger(__name__)
@@ -13,6 +13,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=schemas.SubscriptionIn, summary="Create a subscription")
+@check_role()
 async def create_subscription(
         subscription: schemas.SubscriptionIn,
         user: schemas.User = Depends(JWTBearer()),
@@ -25,7 +26,7 @@ async def create_subscription(
     - **description**: description to subscription
     - **price**: price to subscription
     """
-    # TODO добавить проверку роли администратора
+
     try:
         db_subscription = await subscription_service.create_subscription(subscription=subscription)
         return schemas.SubscriptionIn(**db_subscription.__dict__)
@@ -35,6 +36,7 @@ async def create_subscription(
 
 
 @router.put("/{title}", response_model=schemas.SubscriptionIn, summary="Change a subscription")
+@check_role()
 async def change_subscription(
         title: schemas.Subscription,
         subscription: schemas.SubscriptionIn,
@@ -48,7 +50,7 @@ async def change_subscription(
     - **description**: description to subscription
     - **price**: price to subscription
     """
-    # TODO добавить проверку роли администратора
+
     db_subscription = await subscription_service.get_subscription_by_title(title.name)
     if not db_subscription:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Subscription not found")
