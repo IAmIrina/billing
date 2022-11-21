@@ -3,6 +3,7 @@ import logging
 from uuid import UUID
 
 from services.role_updater import RoleUpdater
+from services.data_enricher import DataEnricher
 
 
 logger = logging.getLogger(__name__)
@@ -10,32 +11,35 @@ logger = logging.getLogger(__name__)
 
 class PaymentManager:
     """Управляет обработкой успешной транзакции и взаимодействует с другими сервисами"""
-    def __init__(self, auth_updater: RoleUpdater, enricher, model_to_process):
+    def __init__(self, auth_updater: RoleUpdater, enricher: DataEnricher, model_to_process):
         self._auth_updater = auth_updater
         self._enricher = enricher
         self._model_to_process = model_to_process
 
-    async def watch_payments(self):
+    async def watch_payments(self) -> None:
         """Мониторит новые необработанные записи в БД"""
         while True:
             time.sleep(2)
-            payments = await self._enricher.get_uncompleted_payments(self._model_to_process)
-            # Если у нас есть необработанные
-            if payments:
-                for payment in payments:
-                    logger.warning(f"There are uncompleted payment: {payment}")
-                    await self._update_roles([payment.user_id], ['standart'])
+            await self.mark_as_completed('b902ad46-e814-4ddb-9d80-86138c1325af')
+            # payments = await self._enricher.get_uncompleted_payments(self._model_to_process)
+            # # Если у нас есть необработанные оплаты
+            # if payments:
+            #     for payment in payments:
+            #         logger.warning(f"There are uncompleted payment: {payment}")
+            #         await self._update_roles([payment.user_id], ['standart', 'premium'])
+            # TODO Добавить логику удаления ролей при возвратах
 
-
-
-    async def _update_roles(self, users: list[UUID], roles: list[UUID]):
+    async def _update_roles(self, users: list[UUID], roles: list[UUID]) -> None:
         """Изменяет Роли"""
-        await self._auth_updater.add_roles(
-            users=users,
-            roles=roles
-        )
+        # TODO Добавить логику, при которой можно и удалять, и добавлять роли через эту функцию.
+        await self._auth_updater.add_roles(users=users, roles=roles)
         logger.warning("Roles Updated")
 
-    def send_notifications(self):
-        """Отправляет Уведомления"""
-        pass
+    async def mark_as_completed(self, id: UUID) -> None:
+        """Помечает Оплату как завершенную"""
+        await self._enricher.mark_as_completed(self._model_to_process, id, completed=True)
+        logger.warning("Payment Management Completed on payment {id}")
+
+    def send_notifications(self) -> None:
+        """Отправляет Уведомления через сервис уведомлений"""
+        raise NotImplementedError

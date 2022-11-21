@@ -7,6 +7,9 @@ from schema.rest import HttpMethod
 import aiohttp
 
 
+logger = logging.getLogger(__name__)
+
+
 class RoleUpdater:
     """Добавляет и удаляет роли Пользователя, используя удаленный сервис Авторизации"""
     def __init__(self, roles_url: str, login_url: str, superuser_email: str, superuser_pass: str):
@@ -62,6 +65,7 @@ class RoleUpdater:
                 payload = {"name": role, "date": str(dt.datetime.now().date())}
                 # Отправляем запрос
                 response = await self._send_async_request(HttpMethod.POST, url, json=payload, headers=headers)
+                logger.warning(f"HTTP Response: {response}")
                 # Если Access Token потерял актуальность, то обновляем его и переотправляем запрос
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
