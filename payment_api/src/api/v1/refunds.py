@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 from api.v1 import schemas
 from schema.payment import RefundReason
-from services.auth import JWTBearer
+from services.auth import JWTBearer, check_role
 from services.payment import PaymentService, get_payment_service
 
 logger = logging.getLogger(__name__)
@@ -14,6 +14,7 @@ router = APIRouter()
 
 
 @router.post("/", summary="Create a refund")
+@check_role()
 async def create_refund(
         payment: schemas.PaymentIntent,
         user: schemas.User = Depends(JWTBearer()),
@@ -25,7 +26,7 @@ async def create_refund(
     - **user_id**: user id
     - **intent_id**: intent id
     """
-    # TODO добавить проверку роли администратора
+
     db_payment = await payment_service.get_payment_by_intent_id(
         user_id=str(payment.user_id),
         intent_id=payment.intent_id,

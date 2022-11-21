@@ -51,6 +51,7 @@ class Settings(DotEnvMixin):
     server_address: str = 'http://localhost:8000/'
     stripe: StripeSecrets = StripeSecrets()
     payment: PaymentSettings = PaymentSettings()
+    superuser_role_name: str = 'superadmin'
 
     class Config:
         env_file_encoding = 'utf-8'
