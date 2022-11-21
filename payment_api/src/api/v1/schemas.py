@@ -54,3 +54,7 @@ class SubscriptionIn(BaseModel):
 class PaymentIntent(BaseModel):
     user_id: UUID
     intent_id: str
+
+
+class AutoPayment(BaseModel):
+    is_enable: bool

@@ -3,14 +3,17 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.templating import Jinja2Templates
+from starlette.responses import JSONResponse
 
 from api.v1 import schemas
 from api.v1.paginator import Paginator
+from api.v1.schemas import AutoPayment
 from core.config import settings
 from schema.product import Product, ProductData
 from services.auth import JWTBearer
 from services.payment import PaymentService, get_payment_service
 from services.subscruption import SubscriptionService, get_subscription_service
+from services.user import UserService, get_user_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -70,14 +73,14 @@ async def create_payment(
 async def get_paid_payments(
         user: schemas.User = Depends(JWTBearer()),
         paginator: Paginator = Depends(),
-        person_service: PaymentService = Depends(get_payment_service),
+        payment_service: PaymentService = Depends(get_payment_service),
 ):
     """
         Return paid payments by user:
         - **page[size]**: size of page
         - **page[number]**: number of page
         """
-    db_payments = await person_service.get_paid_payments(
+    db_payments = await payment_service.get_paid_payments(
         offset=paginator.page - 1,
         limit=paginator.per_page,
         user_id=str(user.id),
@@ -90,3 +93,21 @@ async def get_paid_payments(
         ),
         data=[schemas.PaymentOut(**db_payment.__dict__) for db_payment in db_payments],
     )
+
+
+@router.patch("/auto_payment", summary="Change auto payment")
+async def change_auto_payment(
+        auto_payment: AutoPayment,
+        user: schemas.User = Depends(JWTBearer()),
+        user_service: UserService = Depends(get_user_service),
+):
+    """
+        Return paid payments by user:
+        - **is_enable**: enable or disable auto payment
+        """
+    db_user = await user_service.get_user(user.id)
+    if not db_user:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="User doesn't exist")
+    await user_service.change_user_is_recurrent_payments(db_user, auto_payment.is_enable)
+
+    return JSONResponse(status_code=HTTPStatus.OK, content='OK')
