@@ -38,6 +38,8 @@ services:
       - .auth_env
     expose:
       - "8000"
+    ports:
+      - "8999:8000"
     volumes:
       - /tmp/logs/app/json:/var/log/app
     depends_on:

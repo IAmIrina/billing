@@ -39,6 +39,12 @@ class DataEnricher:
         async with self._engine.connect() as conn:
             result = await conn.execute(select(model).where(model.payment_intent == kwargs["payment_intent"]))
             return result.fetchall()
+        await engine.dispose()
 
+    async def get_uncompleted_payments(self, model):
+        """Получаем те оплаты, в которых совпадает указанный интент"""
+        async with self._engine.connect() as conn:
+            result = await conn.execute(select(model).where(model.completed == False))
+            return result.fetchall()
         await engine.dispose()
 

@@ -26,10 +26,9 @@ manager = PaymentManager(
 )
 
 # Постоянный луп включаем
-asyncio.run(manager.watch_payments())
+if __name__ == "__main__":
+    asyncio.run(manager.watch_payments())
 
-# result = asyncio.run(enricher.get_payments_by_intent(PaymentToProcess, payment_intent="test_intent2"))
-# print(result)
 
 
 
