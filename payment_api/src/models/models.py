@@ -45,3 +45,4 @@ class PaymentToProcess(Base):
     user_id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False)
     price = sqlalchemy.Column(sqlalchemy.Integer)
     payment_intent = sqlalchemy.Column(sqlalchemy.String)
+    completed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
