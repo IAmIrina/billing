@@ -36,6 +36,9 @@ class User(Base):
 
 
 class PaymentToProcess(Base):
+    """
+    Таблица для Успешных Оплат/Возвратов, которые необходимо обработать внутри Проекта Movies (сменить роли и т.п.)
+    """
     __tablename__ = 'paymentstoprocess'
 
     id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False, index=True, primary_key=True)
