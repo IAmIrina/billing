@@ -1,6 +1,6 @@
-from db.postgres import engine
 from sqlalchemy import MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
+from src.db.postgres import engine
 
 Base = declarative_base()
 metadata = MetaData()

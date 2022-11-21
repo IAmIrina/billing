@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from core.config import db_settings
-from db.postgres import session
-from models.models import Payment
 from sqlalchemy import and_
+from src.core.config import db_settings
+from src.db.postgres import session
+from src.models.models import Payment
 
 
 def get_expiring_subscriptions():

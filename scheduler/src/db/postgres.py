@@ -1,6 +1,6 @@
-from core.config import db_settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from src.core.config import db_settings
 
 DB_URI = 'postgresql+psycopg2://{}:{}@{}:{}/{}'.format(db_settings.user, db_settings.password, db_settings.host,
                                                        db_settings.port, db_settings.db)
