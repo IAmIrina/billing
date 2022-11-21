@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from api.v1 import payments, subscriptions
+from api.v1 import payments, subscriptions, refunds
 from core.config import settings
 from ecom import stripe_api
 
@@ -28,8 +28,9 @@ async def shutdown():
     ...
 
 
-app.include_router(payments.router, prefix='/api/v1/payment', tags=['payment'])
-app.include_router(subscriptions.router, prefix='/api/v1/subscription', tags=['subscription'])
+app.include_router(payments.router, prefix='/api/v1/payments', tags=['payments'])
+app.include_router(subscriptions.router, prefix='/api/v1/subscriptions', tags=['subscriptions'])
+app.include_router(refunds.router, prefix='/api/v1/refunds', tags=['refunds'])
 
 if __name__ == '__main__':
     uvicorn.run(
