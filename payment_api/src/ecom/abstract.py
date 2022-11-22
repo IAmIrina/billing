@@ -13,7 +13,7 @@ class EcomClient(ABC):
         pass
 
     @abstractmethod
-    async def create_customer(self, name: str, email: str, idempotency_key: str = None) -> str:
+    async def create_customer(self, name: str = None, email: str = None, idempotency_key: str = None) -> str:
         """Create customer on ecom side.
 
             Args:

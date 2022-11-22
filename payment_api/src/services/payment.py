@@ -81,8 +81,6 @@ class PaymentService(BaseService):
         db_user = await self.user_service.get_user(user.id)
         if not db_user:
             customer_id = await self.payment_system_client.create_customer(
-                # TODO удалить заглушки для имени и почты
-                name='name', email='ya@ya.ru',
                 idempotency_key=str(user.id)
             )
             db_user = await self.user_service.create_user(
