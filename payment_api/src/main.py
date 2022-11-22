@@ -5,6 +5,9 @@ from fastapi.responses import ORJSONResponse
 from api.v1 import payments, subscriptions
 from core.config import settings
 from ecom import stripe_api
+from services.payment_manager import PaymentManager
+from services.data_enricher import DataEnricher
+from services.role_updater import RoleUpdater
 
 app = FastAPI(
     title=settings.project_name,
@@ -30,6 +33,23 @@ async def shutdown():
 
 app.include_router(payments.router, prefix='/api/v1/payment', tags=['payment'])
 app.include_router(subscriptions.router, prefix='/api/v1/subscription', tags=['subscription'])
+
+# Инициализируем компоненты и сам объект, который будет обрабатывать оплаты
+# enricher = DataEnricher(db_uri=settings.postgres.dsn)
+# updater = RoleUpdater(
+#     settings.auth.roles_url,
+#     settings.auth.login_url,
+#     settings.auth.superuser_email,
+#     settings.auth.superuser_password,
+# )
+# manager = PaymentManager(
+#     auth_updater=updater,
+#     enricher=enricher,
+#     model_to_process=PaymentToProcess
+# )
+# asyncio.run(manager.watch_payments())
+
+
 
 if __name__ == '__main__':
     uvicorn.run(

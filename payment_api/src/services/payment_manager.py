@@ -20,19 +20,22 @@ class PaymentManager:
         """Мониторит новые необработанные записи в БД"""
         while True:
             time.sleep(2)
-            await self.mark_as_completed('b902ad46-e814-4ddb-9d80-86138c1325af')
-            # payments = await self._enricher.get_uncompleted_payments(self._model_to_process)
-            # # Если у нас есть необработанные оплаты
-            # if payments:
-            #     for payment in payments:
-            #         logger.warning(f"There are uncompleted payment: {payment}")
-            #         await self._update_roles([payment.user_id], ['standart', 'premium'])
+
+            payments = await self._enricher.get_uncompleted_payments(self._model_to_process)
+            # Если у нас есть необработанные оплаты
+            if payments:
+                for payment in payments:
+                    logger.warning(f"There are uncompleted payment: {payment}")
+                    # Изменяем Роли Рользователя
+                    await self._update_roles([payment.user_id], ['standart', 'premium'])
+                    # Отмечаем Оплату как Завершенную
+                    await self.mark_as_completed(payment.id)
             # TODO Добавить логику удаления ролей при возвратах
 
     async def _update_roles(self, users: list[UUID], roles: list[UUID]) -> None:
         """Изменяет Роли"""
         # TODO Добавить логику, при которой можно и удалять, и добавлять роли через эту функцию.
-        await self._auth_updater.add_roles(users=users, roles=roles)
+        await self._auth_updater.remove_roles(users=users, roles=roles)
         logger.warning("Roles Updated")
 
     async def mark_as_completed(self, id: UUID) -> None:
@@ -43,3 +46,4 @@ class PaymentManager:
     def send_notifications(self) -> None:
         """Отправляет Уведомления через сервис уведомлений"""
         raise NotImplementedError
+
