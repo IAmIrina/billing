@@ -42,6 +42,7 @@ app.include_router(subscriptions.router, prefix='/api/v1/subscriptions', tags=['
 app.include_router(refunds.router, prefix='/api/v1/refunds', tags=['refunds'])
 app.include_router(webhook.router, prefix='/api/v1/webhook', tags=['webhook'])
 
+
 if __name__ == '__main__':
     uvicorn.run(
         'main:app',
