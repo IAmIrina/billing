@@ -1,6 +1,5 @@
 from pydantic import BaseSettings, Field
 
-import logging
 
 class DotEnvMixin(BaseSettings):
     class Config:
@@ -8,6 +7,7 @@ class DotEnvMixin(BaseSettings):
 
 
 class AuthSettings(DotEnvMixin):
+    """Настройки для связи с нашим сервисом Авторизации"""
     auth_host: str = Field("localhost", env='AUTH_HOST')
     auth_port: int = Field(8999, env='AUTH_PORT')
     superuser_email: str = Field("alexvkleschov@gmail.com", env='AUTH_SUPERUSER_EMAIL')
@@ -17,17 +17,19 @@ class AuthSettings(DotEnvMixin):
 
     @property
     def roles_url(self):
+        """Получение полного пути к эндпоинту по работе с Ролями"""
         return f"http://{self.auth_host}:{self.auth_port}{self.roles_path}"
 
     @property
     def login_url(self):
+        """Получение полного пути к эндпоинту по авторизации Юзера"""
         return f"http://{self.auth_host}:{self.auth_port}{self.login_path}"
 
 
 class Settings(DotEnvMixin):
+    """Класс, дающий доступ к разным категориям настроек"""
     auth: AuthSettings = AuthSettings()
 
 
 # Создаем объект Настроек
 settings = Settings()
-logging.warning(settings)

@@ -45,7 +45,6 @@ class Settings(DotEnvMixin):
     postgres: PostgresSettings = PostgresSettings()
     jwt_secret: str = 'secret'
     jwt_algorithm: str = 'HS256'
-
     debug: bool = False
     secret_key: str = 'S#perS3crEt_9999'
     server_address: str = 'http://localhost:8000/'
