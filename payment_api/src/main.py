@@ -2,9 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from api.v1 import payments, subscriptions
+from api.v1 import payments, subscriptions, refunds, webhook
 from core.config import settings
-from ecom import stripe_api
+from ecom import stripe_api, event_listeners
 
 
 app = FastAPI(
@@ -22,6 +22,8 @@ async def startup():
         method_types=settings.payment.method_types,
         public_key=settings.stripe.public_key.get_secret_value(),
     )
+    event_listeners.event_listener = event_listeners.StripeEventListener(
+        endpoint_secret=settings.stripe.endpoint_secret.get_secret_value())
 
 
 @app.on_event('shutdown')
@@ -29,8 +31,10 @@ async def shutdown():
     ...
 
 
-app.include_router(payments.router, prefix='/api/v1/payment', tags=['payment'])
-app.include_router(subscriptions.router, prefix='/api/v1/subscription', tags=['subscription'])
+app.include_router(payments.router, prefix='/api/v1/payments', tags=['payments'])
+app.include_router(subscriptions.router, prefix='/api/v1/subscriptions', tags=['subscriptions'])
+app.include_router(refunds.router, prefix='/api/v1/refunds', tags=['refunds'])
+app.include_router(webhook.router, prefix='/api/v1/webhook', tags=['webhook'])
 
 
 if __name__ == '__main__':

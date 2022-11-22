@@ -1,5 +1,6 @@
 import logging
 import time
+from functools import wraps
 from http import HTTPStatus
 from typing import Optional, List
 from uuid import UUID
@@ -52,3 +53,21 @@ def decode_jwt(token: str) -> Optional[dict]:
         return decoded_token if decoded_token['exp'] >= time.time() else None
     except jwt.exceptions.PyJWTError:
         return {}
+
+
+def check_role(role_name=None):
+    """
+    Проверяет есть ли у пользователя роль, которая установлена для защищенного маршрута
+    """
+
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            if settings.superuser_role_name not in kwargs['user'].roles:
+                if not role_name or (role_name not in kwargs['user'].roles):
+                    raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
+            return fn(*args, **kwargs)
+
+        return decorator
+
+    return wrapper

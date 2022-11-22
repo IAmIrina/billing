@@ -1,7 +1,8 @@
 import sqlalchemy
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from db.postgres import Base
+from models.partitions import PartitionByMonthMeta
 
 
 class Payment(Base):
@@ -35,14 +36,18 @@ class User(Base):
     is_recurrent_payments = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
 
 
-class PaymentToProcess(Base):
-    """
-    Таблица для Успешных Оплат/Возвратов, которые необходимо обработать внутри Проекта Movies (сменить роли и т.п.)
-    """
-    __tablename__ = 'paymentstoprocess'
+class EventMixin:
+    # id = sqlalchemy.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    payment_system_id = sqlalchemy.Column(sqlalchemy.String)
+    received_at = sqlalchemy.Column(
+        sqlalchemy.DateTime(timezone=True),
+        primary_key=True,
+        nullable=False,
+        server_default=sqlalchemy.text('CURRENT_TIMESTAMP'),
+    )
+    data = sqlalchemy.Column(JSONB)
+    processed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
 
-    id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False, index=True, primary_key=True)
-    user_id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False)
-    price = sqlalchemy.Column(sqlalchemy.Integer)
-    payment_intent = sqlalchemy.Column(sqlalchemy.String)
-    completed = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+
+class Event(EventMixin, Base, metaclass=PartitionByMonthMeta, partition_by='received_at'):
+    __tablename__ = 'events'
