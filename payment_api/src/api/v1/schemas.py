@@ -56,6 +56,9 @@ class PaymentIntent(BaseModel):
     user_id: UUID
     intent_id: str
 
-
 class WebhookResponse(BaseModel):
     success: bool
+
+class AutoPayment(BaseModel):
+    is_enable: bool
+

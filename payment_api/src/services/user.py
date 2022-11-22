@@ -28,6 +28,13 @@ class UserService(BaseService):
         await self.session.refresh(user)
         return user
 
+    async def change_user_is_recurrent_payments(self, db_user, is_recurrent_payments):
+        db_user.is_recurrent_payments = is_recurrent_payments
+        self.session.add(db_user)
+        await self.session.commit()
+        await self.session.refresh(db_user)
+        return db_user
+
 
 @lru_cache()
 def get_user_service(session: AsyncSession = Depends(get_db)) -> UserService:
