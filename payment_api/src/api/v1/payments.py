@@ -35,16 +35,15 @@ async def create_payment(
     - **subscription**: subscription title
     - **start_date**: date of start subscription
     """
-
     db_payment = await payment_service.get_payment(
         user_id=str(user.id),
-        subscription=payment.subscription.name,
+        subscription=payment.subscription,
         start_date=payment.start_date
     )
     if db_payment:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Paid period is not yet over")
 
-    subscription = await subscription_service.get_subscription_by_title(payment.subscription.name)
+    subscription = await subscription_service.get_subscription_by_title(payment.subscription)
     if not subscription:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Subscription not found")
 
