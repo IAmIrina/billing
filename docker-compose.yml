@@ -46,6 +46,15 @@ services:
       - auth_redis
       - auth_db
 
+  payment-manager:
+    container_name: payment-manager
+    build: payment_manager/
+    env_file:
+      - ./.env
+    depends_on:
+      - payment_api
+      - auth_api
+
 volumes:
   postgres_volume:
   postgres_data:
