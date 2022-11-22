@@ -62,11 +62,11 @@ def check_role(role_name=None):
 
     def wrapper(fn):
         @wraps(fn)
-        def decorator(*args, **kwargs):
+        async def decorator(*args, **kwargs):
             if settings.superuser_role_name not in kwargs['user'].roles:
                 if not role_name or (role_name not in kwargs['user'].roles):
                     raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden")
-            return fn(*args, **kwargs)
+            return await fn(*args, **kwargs)
 
         return decorator
 
