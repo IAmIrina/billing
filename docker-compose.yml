@@ -38,11 +38,22 @@ services:
       - .auth_env
     expose:
       - "8000"
+    ports:
+      - "8999:8000"
     volumes:
       - /tmp/logs/app/json:/var/log/app
     depends_on:
       - auth_redis
       - auth_db
+
+  payment-manager:
+    container_name: payment-manager
+    build: payment_manager/
+    env_file:
+      - ./.env
+    depends_on:
+      - payment_api
+      - auth_api
 
 volumes:
   postgres_volume:
