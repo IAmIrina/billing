@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-from schema.payment import CancelReason, PaymentEvent, RefundReason
+from schema.payment import CancelReason, RefundReason
 from schema.product import Product
 
 
@@ -102,15 +102,15 @@ class EcomClient(ABC):
         pass
 
 
-class EcomEventParser(ABC):
+class EcomEventListener(ABC):
     @abstractmethod
-    async def parse(self, payload: bytes, headers: dict) -> PaymentEvent:
-        """Parse webhook event.
+    async def validate(self, payload: bytes, headers: dict) -> str:
+        """Validate payment event.
             Args:
                 payload: Event payload.
                 headers: Event headers.
 
             Returns:
-                PaymentEvent: Object that represent parsed webhook event.
+                str: event ID.
         """
         pass
