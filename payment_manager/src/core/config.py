@@ -26,9 +26,21 @@ class AuthSettings(DotEnvMixin):
         return f"http://{self.auth_host}:{self.auth_port}{self.login_path}"
 
 
+class PostgresSettings(DotEnvMixin):
+    user: str = Field("postgres", env='POSTGRES_USER')
+    password: str = Field("password", env='POSTGRES_PASSWORD')
+    host: str = Field("db", env='POSTGRES_HOST')
+    port: int = Field(5432, env='POSTGRES_PORT')
+    db: str = Field("payments", env='POSTGRES_DB')
+
+    @property
+    def dsn(self):
+        return f'postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}'
+
 class Settings(DotEnvMixin):
     """Класс, дающий доступ к разным категориям настроек"""
     auth: AuthSettings = AuthSettings()
+    postgres: PostgresSettings = PostgresSettings()
 
 
 # Создаем объект Настроек

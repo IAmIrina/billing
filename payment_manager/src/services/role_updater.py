@@ -2,7 +2,7 @@ from uuid import UUID
 import datetime as dt
 from http import HTTPStatus
 import logging
-from schema.rest import HttpMethod
+from src.schemas.schemas import HttpMethod
 
 import aiohttp
 
@@ -22,19 +22,20 @@ class RoleUpdater:
     @staticmethod
     async def _send_async_request(method: HttpMethod, url: str, **kwargs):
         """Отправляет асинхронный запрос на указанный URL"""
-        async with aiohttp.ClientSession() as session:
+        conn = aiohttp.TCPConnector(limit_per_host=5)
+        async with aiohttp.ClientSession(connector=conn, trust_env=True) as session:
             match method:
                 case HttpMethod.GET:
                     response = await session.get(url, **kwargs)
                     return response
                 case HttpMethod.POST:
-                    response = await session.post(url, **kwargs)
+                    response = await session.post(url, ssl=False, **kwargs)
                     return response
                 case HttpMethod.DELETE:
                     response = await session.delete(url, **kwargs)
                     return response
                 case _:
-                    logging.warning("HTTP Method: {method} is undefined")
+                    logger.warning(f"HTTP Method: {method} is undefined")
 
     async def _get_superuser_access_token(self) -> None:
         """Позволяет обновить access token Суперюзера"""
@@ -56,7 +57,7 @@ class RoleUpdater:
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
             for role in roles:
-                url = f"{self.roles_url}{user}/roles"
+                url = f"{self.roles_url}/{user}/roles"
                 # Если мы не запрашивали access token, то следует запросить
                 if not self.superuser_access_token:
                     await self._get_superuser_access_token()
@@ -76,7 +77,7 @@ class RoleUpdater:
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
             for role in roles:
-                url = f"{self.roles_url}{user}/roles"
+                url = f"{self.roles_url}/{user}/roles"
                 # Если мы не запрашивали access token, то перезапрашиваем
                 if not self.superuser_access_token:
                     await self._get_superuser_access_token()
