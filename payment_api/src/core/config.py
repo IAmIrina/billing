@@ -39,10 +39,20 @@ class StripeSecrets(DotEnvMixin):
         env_prefix = 'stripe_'
 
 
+class SentrySettings(DotEnvMixin):
+
+    dsn: str
+    traces_sample_rate: float = 1.0
+
+    class Config:
+        env_prefix = 'sentry_'
+
+
 class Settings(DotEnvMixin):
     uvicorn_reload: bool = True
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
+    sentry: SentrySettings = SentrySettings()
     jwt_secret: str = 'secret'
     jwt_algorithm: str = 'HS256'
     debug: bool = False

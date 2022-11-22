@@ -26,6 +26,7 @@ class Subscription(Base):
     title = sqlalchemy.Column(sqlalchemy.String, unique=True, index=True)
     description = sqlalchemy.Column(sqlalchemy.String)
     price = sqlalchemy.Column(sqlalchemy.Integer)
+    roles = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.String), nullable=False)
 
 
 class User(Base):
@@ -37,7 +38,6 @@ class User(Base):
 
 
 class EventMixin:
-    # id = sqlalchemy.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     payment_system_id = sqlalchemy.Column(sqlalchemy.String)
     received_at = sqlalchemy.Column(
         sqlalchemy.DateTime(timezone=True),

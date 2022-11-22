@@ -1,11 +1,17 @@
 import uvicorn
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+
 
 from api.v1 import payments, subscriptions, refunds, webhook
 from core.config import settings
 from ecom import stripe_api, event_listeners
 
+sentry_sdk.init(
+    dsn=settings.sentry.dsn,
+    traces_sample_rate=settings.sentry.traces_sample_rate,
+)
 
 app = FastAPI(
     title=settings.project_name,

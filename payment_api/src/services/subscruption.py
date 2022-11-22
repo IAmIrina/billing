@@ -13,11 +13,7 @@ from services.base import BaseService
 class SubscriptionService(BaseService):
 
     async def create_subscription(self, subscription: schemas.SubscriptionIn):
-        db_subscription = models.Subscription(
-            title=subscription.title.name,
-            description=subscription.description,
-            price=subscription.price
-        )
+        db_subscription = models.Subscription(**subscription.dict())
         self.session.add(db_subscription)
         await self.session.commit()
         await self.session.refresh(db_subscription)
@@ -34,6 +30,7 @@ class SubscriptionService(BaseService):
         db_subscription.title = title
         db_subscription.description = subscription.description
         db_subscription.price = subscription.price
+        db_subscription.roles = subscription.roles
         self.session.add(db_subscription)
         await self.session.commit()
         await self.session.refresh(db_subscription)

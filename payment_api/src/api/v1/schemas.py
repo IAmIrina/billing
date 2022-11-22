@@ -1,15 +1,8 @@
 from datetime import date
-from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel
 from typing import List
-
-
-class Subscription(Enum):
-    guest = 'guest'
-    standart = 'standart'
-    premium = 'premium'
 
 
 class User(BaseModel):
@@ -18,7 +11,7 @@ class User(BaseModel):
 
 
 class Payment(BaseModel):
-    subscription: Subscription
+    subscription: str
     start_date: date
 
 
@@ -47,18 +40,23 @@ class UserPayment(Payment):
 
 
 class SubscriptionIn(BaseModel):
-    title: Subscription
+    title: str
     description: str
     price: int
+    roles: List[str]
+
+    class Config:
+        orm_mode = True
 
 
 class PaymentIntent(BaseModel):
     user_id: UUID
     intent_id: str
 
+
 class WebhookResponse(BaseModel):
     success: bool
 
+
 class AutoPayment(BaseModel):
     is_enable: bool
-
