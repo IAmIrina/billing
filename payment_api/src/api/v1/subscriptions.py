@@ -26,10 +26,9 @@ async def create_subscription(
     - **description**: description to subscription
     - **price**: price to subscription
     """
-
     try:
         db_subscription = await subscription_service.create_subscription(subscription=subscription)
-        return schemas.SubscriptionIn(**db_subscription.__dict__)
+        return db_subscription
     except IntegrityError as e:
         logger.error(e)
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Subscription already registered")
@@ -38,7 +37,7 @@ async def create_subscription(
 @router.put("/{title}", response_model=schemas.SubscriptionIn, summary="Change a subscription")
 @check_role()
 async def change_subscription(
-        title: schemas.Subscription,
+        title: str,
         subscription: schemas.SubscriptionIn,
         user: schemas.User = Depends(JWTBearer()),
         subscription_service: SubscriptionService = Depends(get_subscription_service),
@@ -51,8 +50,8 @@ async def change_subscription(
     - **price**: price to subscription
     """
 
-    db_subscription = await subscription_service.get_subscription_by_title(title.name)
+    db_subscription = await subscription_service.get_subscription_by_title(title)
     if not db_subscription:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Subscription not found")
-    res = await subscription_service.change_subscription(subscription=subscription, title=title.name)
-    return schemas.SubscriptionIn(**res.__dict__)
+    res = await subscription_service.change_subscription(subscription=subscription, title=title)
+    return res
