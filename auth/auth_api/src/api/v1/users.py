@@ -3,6 +3,7 @@ from flask_security.utils import hash_password
 from marshmallow.fields import Boolean
 
 from src.api.v1.schemas import UserIn, UserOut, AuthHistoryOut, RoleName, RoleOut, AuthHistoryQuery
+from src.api.v1.roles import validate_uuid
 from src.services import user as user_service, role as role_service
 from src.services.jwt_service import check_role_jwt, auth
 from src.core.config import api_settings
@@ -94,3 +95,12 @@ def remove_role_from_user(user_id, data):
 def get_user_roles(user_id):
     user = user_service.get_user_or_404(id=user_id)
     return user.roles
+
+
+@users_route.get('/<user_id>')
+@users_route.output(UserOut)
+@users_route.auth_required(auth)
+@check_role_jwt(api_settings.superuser_role_name)
+def get_user(user_id):
+    validate_uuid(user_id)
+    return user_service.get_user_or_404(id=user_id)
