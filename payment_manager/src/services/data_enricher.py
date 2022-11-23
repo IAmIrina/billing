@@ -22,7 +22,7 @@ class DataEnricher:
             result = await db_session.execute(select(models.Payment).where(models.Payment.intent_id == payment_id))
             return result.scalars().first()
 
-    async def mark_as_completed(self, model, id, **kwargs):
+    async def mark_event_as_completed(self, model, id, **kwargs):
         """Отмечает Оплату как успешную"""
         async with async_db() as db_session:
             query = (
@@ -31,4 +31,13 @@ class DataEnricher:
             )
             await db_session.execute(query)
             await db_session.commit()
-        # await self._engine.dispose()
+
+    async def mark_payment_as_completed(self, model, id, **kwargs):
+        """Отмечает Оплату как успешную"""
+        async with async_db() as db_session:
+            query = (
+                sqlalchemy_update(model).where(model.intent_id == id).values(
+                    **kwargs).execution_options(synchronize_session="fetch")
+            )
+            await db_session.execute(query)
+            await db_session.commit()

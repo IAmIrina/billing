@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from db.postgres import Base
@@ -12,11 +13,13 @@ class Payment(Base):
     user_id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False, index=True)
     start_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
     end_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
-    subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
+    subscription_id = sqlalchemy.Column(sqlalchemy.ForeignKey('subscriptions.id'), index=True)
     payment_url = sqlalchemy.Column(sqlalchemy.String)
     is_paid = sqlalchemy.Column(sqlalchemy.Boolean, index=True, default=False)
     intent_id = sqlalchemy.Column(sqlalchemy.String)
     client_secret = sqlalchemy.Column(sqlalchemy.String)
+    subscription = relationship("Subscription", back_populates="payments", uselist=False, lazy="joined")
+
 
 
 class Subscription(Base):
@@ -27,6 +30,7 @@ class Subscription(Base):
     description = sqlalchemy.Column(sqlalchemy.String)
     price = sqlalchemy.Column(sqlalchemy.Integer)
     roles = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.String), nullable=False)
+    payments = relationship("Payment", back_populates="subscription")
 
 
 class User(Base):
