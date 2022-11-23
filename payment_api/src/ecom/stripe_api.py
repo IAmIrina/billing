@@ -9,8 +9,6 @@ from schema.product import Product
 
 logger = logging.getLogger(__name__)
 
-api_client = None
-
 
 class StripeClient(EcomClient):
     """Implement Stripe API request and proccess the results."""
@@ -161,7 +159,3 @@ class StripeClient(EcomClient):
             refund.charge,
         )
         return refund.charge
-
-
-def get_client() -> EcomClient:
-    return api_client
