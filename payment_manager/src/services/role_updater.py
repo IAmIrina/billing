@@ -1,8 +1,8 @@
+from typing import List
 from uuid import UUID
 import datetime as dt
 from http import HTTPStatus
 import logging
-from src.schemas.schemas import HttpMethod
 
 import aiohttp
 
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class RoleUpdater:
     """Добавляет и удаляет роли Пользователя, используя удаленный сервис Авторизации"""
+
     def __init__(self, roles_url: str, login_url: str, superuser_email: str, superuser_pass: str):
         self.roles_url = roles_url
         self.login_url = login_url
@@ -20,27 +21,21 @@ class RoleUpdater:
         self.superuser_access_token = None
 
     @staticmethod
-    async def _send_async_request(method: HttpMethod, url: str, **kwargs):
+    async def _send_async_request(method: str, url: str, **kwargs):
         """Отправляет асинхронный запрос на указанный URL"""
         conn = aiohttp.TCPConnector(limit_per_host=5)
         async with aiohttp.ClientSession(connector=conn, trust_env=True) as session:
-            match method:
-                case HttpMethod.GET:
-                    response = await session.get(url, **kwargs)
-                    return response
-                case HttpMethod.POST:
-                    response = await session.post(url, ssl=False, **kwargs)
-                    return response
-                case HttpMethod.DELETE:
-                    response = await session.delete(url, **kwargs)
-                    return response
-                case _:
-                    logger.warning(f"HTTP Method: {method} is undefined")
+            try:
+                request_method = getattr(session, method)
+            except (ValueError, AttributeError):
+                logger.warning('Unhandled request type %s', method)
+                return
+            return await request_method(url, **kwargs)
 
     async def _get_superuser_access_token(self) -> None:
         """Позволяет обновить access token Суперюзера"""
         payload = {"email": self.superuser_email, "password": self.superuser_pass}
-        response = await self._send_async_request(HttpMethod.POST, self.login_url, json=payload)
+        response = await self._send_async_request('post', self.login_url, json=payload)
         # Обрабатываем ответ
         if response.status == HTTPStatus.OK:
             # Получаем access token
@@ -52,7 +47,7 @@ class RoleUpdater:
 
             return None
 
-    async def add_roles(self, users: list[UUID], roles: list[str]) -> None:
+    async def add_roles(self, users: List[UUID], roles: List[str], expired_at: str) -> None:
         """Позволяет разом добавить Роли списку Пользователей"""
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
@@ -63,16 +58,16 @@ class RoleUpdater:
                     await self._get_superuser_access_token()
                 # Формируем данные для запроса
                 headers = {"Authorization": f"Bearer {self.superuser_access_token}"}
-                payload = {"name": role, "date": str(dt.datetime.now().date())}
+                payload = {"name": role, "date": expired_at}
                 # Отправляем запрос
-                response = await self._send_async_request(HttpMethod.POST, url, json=payload, headers=headers)
+                response = await self._send_async_request('post', url, json=payload, headers=headers)
                 logger.warning(f"HTTP Response: {response}")
                 # Если Access Token потерял актуальность, то обновляем его и переотправляем запрос
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
-                    await self._send_async_request(HttpMethod.POST, url, json=payload, headers=headers)
+                    await self._send_async_request('post', url, json=payload, headers=headers)
 
-    async def remove_roles(self, users: list[UUID], roles: list[str]) -> None:
+    async def remove_roles(self, users: List[UUID], roles: List[str]) -> None:
         """Позволяет убрать выбранные роли у списка Пользователей"""
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
@@ -85,8 +80,8 @@ class RoleUpdater:
                 headers = {"Authorization": f"Bearer {self.superuser_access_token}"}
                 payload = {"name": role, "date": str(dt.datetime.now().date())}
                 # Отправляем запрос
-                response = await self._send_async_request(HttpMethod.DELETE, url, json=payload, headers=headers)
+                response = await self._send_async_request('delete', url, json=payload, headers=headers)
                 # Если Access Token потерял актуальность, то обновляем его и переотправляем запрос
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
-                    await self._send_async_request(HttpMethod.DELETE, url, json=payload, headers=headers)
+                    await self._send_async_request('delete', url, json=payload, headers=headers)
