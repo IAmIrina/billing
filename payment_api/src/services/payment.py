@@ -68,7 +68,7 @@ class PaymentService(BaseService):
             user_id=user_payment.user_id,
             start_date=user_payment.start_date,
             end_date=user_payment.start_date + relativedelta(months=1, days=-1),
-            subscription=user_payment.subscription.name,
+            subscription=user_payment.subscription,
             client_secret=user_payment.client_secret,
             intent_id=user_payment.intent_id,
         )
