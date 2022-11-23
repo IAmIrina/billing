@@ -1,23 +1,17 @@
 from datetime import date
-from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, HttpUrl
-
-
-class Subscription(Enum):
-    guest = 'guest'
-    standart = 'standart'
-    premium = 'premium'
+from pydantic import BaseModel
+from typing import List
 
 
 class User(BaseModel):
     id: UUID
-    roles: list[str]
+    roles: List[str]
 
 
 class Payment(BaseModel):
-    subscription: Subscription
+    subscription: str
     start_date: date
 
 
@@ -32,7 +26,7 @@ class Pagination(BaseModel):
 
 class PaymentOutSchema(BaseModel):
     meta: Pagination
-    data: list[PaymentOut]
+    data: List[PaymentOut]
 
 
 class ClientSecret(BaseModel):
@@ -46,14 +40,22 @@ class UserPayment(Payment):
 
 
 class SubscriptionIn(BaseModel):
-    title: Subscription
+    title: str
     description: str
     price: int
+    roles: List[str]
+
+    class Config:
+        orm_mode = True
 
 
 class PaymentIntent(BaseModel):
     user_id: UUID
     intent_id: str
+
+
+class WebhookResponse(BaseModel):
+    success: bool
 
 
 class AutoPayment(BaseModel):

@@ -31,21 +31,30 @@ class PaymentSettings(DotEnvMixin):
 
 
 class StripeSecrets(DotEnvMixin):
-    secret_key: SecretStr
-    endpoint_secret: SecretStr
-    public_key: SecretStr
+    secret_key: SecretStr = 'sk_test_key'
+    endpoint_secret: SecretStr = 'pk_test_51M2zGaEUp1F2G8nCjwz4CIQDmbYMnwQov5GiD4fUbGq0WPN4BMXXrSPOI3GvcFdibmskQTG8UMswD2Yp4iSqWNwK00aCATDahk'
+    public_key: SecretStr = 'whsec_endpoint'
 
     class Config:
         env_prefix = 'stripe_'
+
+
+class SentrySettings(DotEnvMixin):
+
+    dsn: str
+    traces_sample_rate: float = 1.0
+
+    class Config:
+        env_prefix = 'sentry_'
 
 
 class Settings(DotEnvMixin):
     uvicorn_reload: bool = True
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
+    sentry: SentrySettings = SentrySettings()
     jwt_secret: str = 'secret'
     jwt_algorithm: str = 'HS256'
-
     debug: bool = False
     secret_key: str = 'S#perS3crEt_9999'
     server_address: str = 'http://localhost:8000/'

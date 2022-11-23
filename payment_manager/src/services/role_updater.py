@@ -1,18 +1,13 @@
 from uuid import UUID
 import datetime as dt
 from http import HTTPStatus
-from enum import Enum
 import logging
+from src.schemas.schemas import HttpMethod
 
 import aiohttp
-import asyncio
 
 
-class HttpMethod(Enum):
-    """Класс с перечислением методов HHTP запросов"""
-    GET = "GET"
-    POST = "POST"
-    DELETE = "DELETE"
+logger = logging.getLogger(__name__)
 
 
 class RoleUpdater:
@@ -27,19 +22,20 @@ class RoleUpdater:
     @staticmethod
     async def _send_async_request(method: HttpMethod, url: str, **kwargs):
         """Отправляет асинхронный запрос на указанный URL"""
-        async with aiohttp.ClientSession() as session:
+        conn = aiohttp.TCPConnector(limit_per_host=5)
+        async with aiohttp.ClientSession(connector=conn, trust_env=True) as session:
             match method:
                 case HttpMethod.GET:
                     response = await session.get(url, **kwargs)
                     return response
                 case HttpMethod.POST:
-                    response = await session.post(url, **kwargs)
+                    response = await session.post(url, ssl=False, **kwargs)
                     return response
                 case HttpMethod.DELETE:
                     response = await session.delete(url, **kwargs)
                     return response
                 case _:
-                    logging.warning("HTTP Method: {method} is undefined")
+                    logger.warning(f"HTTP Method: {method} is undefined")
 
     async def _get_superuser_access_token(self) -> None:
         """Позволяет обновить access token Суперюзера"""
@@ -61,7 +57,7 @@ class RoleUpdater:
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
             for role in roles:
-                url = f"{self.roles_url}{user}/roles"
+                url = f"{self.roles_url}/{user}/roles"
                 # Если мы не запрашивали access token, то следует запросить
                 if not self.superuser_access_token:
                     await self._get_superuser_access_token()
@@ -70,6 +66,7 @@ class RoleUpdater:
                 payload = {"name": role, "date": str(dt.datetime.now().date())}
                 # Отправляем запрос
                 response = await self._send_async_request(HttpMethod.POST, url, json=payload, headers=headers)
+                logger.warning(f"HTTP Response: {response}")
                 # Если Access Token потерял актуальность, то обновляем его и переотправляем запрос
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
@@ -80,7 +77,7 @@ class RoleUpdater:
         # Для каждого Пользователя и для каждой Роли:
         for user in users:
             for role in roles:
-                url = f"{self.roles_url}{user}/roles"
+                url = f"{self.roles_url}/{user}/roles"
                 # Если мы не запрашивали access token, то перезапрашиваем
                 if not self.superuser_access_token:
                     await self._get_superuser_access_token()
