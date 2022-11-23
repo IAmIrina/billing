@@ -5,6 +5,10 @@ class DotEnvMixin(BaseSettings):
     class Config:
         env_file = '.env'
 
+class NotificationSettings(DotEnvMixin):
+    """Настройки для связи с нашим сервисом Авторизации"""
+    notification_url: str = Field(..., env='NOTIFICATION_URL')
+
 
 class AuthSettings(DotEnvMixin):
     """Настройки для связи с нашим сервисом Авторизации"""
@@ -14,6 +18,7 @@ class AuthSettings(DotEnvMixin):
     superuser_password: str = Field(..., env='AUTH_SUPERUSER_PASSWORD')
     roles_path: str = Field("/auth/api/v1/users/", env='AUTH_ROLES_PATH')
     login_path: str = Field("/auth/api/v1/auth/login", env='AUTH_LOGIN_PATH')
+    user_info_path: str = Field("/auth/api/v1/auth/info", env='AUTH_USER_INFO_PATH')
 
     @property
     def roles_url(self):
@@ -24,6 +29,11 @@ class AuthSettings(DotEnvMixin):
     def login_url(self):
         """Получение полного пути к эндпоинту по авторизации Юзера"""
         return f"http://{self.auth_host}:{self.auth_port}{self.login_path}"
+
+    @property
+    def user_info_path(self):
+        """Получение полного пути к эндпоинту по работе с Ролями"""
+        return f"http://{self.auth_host}:{self.auth_port}{self.user_info_path}"
 
 
 class PostgresSettings(DotEnvMixin):
@@ -42,6 +52,7 @@ class Settings(DotEnvMixin):
     """Класс, дающий доступ к разным категориям настроек"""
     auth: AuthSettings = AuthSettings()
     postgres: PostgresSettings = PostgresSettings()
+    notification: NotificationSettings = NotificationSettings()
 
 
 # Создаем объект Настроек

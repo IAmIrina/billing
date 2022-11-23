@@ -5,6 +5,7 @@ from uuid import UUID
 
 from services.role_updater import RoleUpdater
 from services.data_enricher import DataEnricher
+from services.notifier import PaymentNotifier
 from services.ecom_parser import StripeEventParser
 from typing import List
 
@@ -16,8 +17,9 @@ logger = logging.getLogger(__name__)
 class PaymentManager:
     """Управляет обработкой успешной транзакции и взаимодействует с другими сервисами"""
 
-    def __init__(self, auth_updater: RoleUpdater, enricher: DataEnricher, model_to_process):
+    def __init__(self, auth_updater: RoleUpdater, enricher: DataEnricher, notifier: PaymentNotifier, model_to_process):
         self._auth_updater = auth_updater
+        self._notifier = notifier
         self._enricher = enricher
         self._model_to_process = model_to_process
         self.event_parser = StripeEventParser()
@@ -25,7 +27,6 @@ class PaymentManager:
     async def watch_events(self) -> None:
         """Мониторит новые необработанные записи в БД"""
         while True:
-            logger.warning("Watch New Events")
             events = await self._enricher.get_uncompleted_events(models.Event)
             if events:
                 for event in events:
@@ -37,11 +38,13 @@ class PaymentManager:
                         payment = await self._enricher.get_payment_info(event_data.data.payment_intent)
                         if event_data.type.name == 'payment_intent_succeeded':
                             await self._update_roles([payment.user_id], payment.subscription.roles, str(payment.end_date))
+                            self._notifier.send_notification([payment.user_id], 'subscription_done')
                         elif event_data.type.name == 'charge_refunded':
                             await self._update_roles(
                                 [payment.user_id], payment.subscription.roles,
                                 str(dt.datetime.now().date())
                             )
+                            self._notifier.send_notification([payment.user_id], 'subscription_canceled')
                         await self.mark_event_as_completed(event.payment_system_id)
                         await self.mark_payment_as_paid(payment.intent_id)
             time.sleep(5)

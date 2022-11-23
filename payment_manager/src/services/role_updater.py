@@ -1,6 +1,5 @@
 from typing import List
 from uuid import UUID
-import datetime as dt
 from http import HTTPStatus
 import logging
 
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class RoleUpdater:
-    """Добавляет и удаляет роли Пользователя, используя удаленный сервис Авторизации"""
+    """Добавляет роли Пользователя, используя удаленный сервис Авторизации"""
 
     def __init__(self, roles_url: str, login_url: str, superuser_email: str, superuser_pass: str):
         self.roles_url = roles_url
@@ -42,7 +41,7 @@ class RoleUpdater:
             data = await response.json()
             access_token = data["access_token"]
             logging.warning("Admin did login")
-            # Сохраняем access_token
+
             self.superuser_access_token = access_token
 
             return None
@@ -66,22 +65,3 @@ class RoleUpdater:
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
                     await self._send_async_request('post', url, json=payload, headers=headers)
-
-    async def remove_roles(self, users: List[UUID], roles: List[str]) -> None:
-        """Позволяет убрать выбранные роли у списка Пользователей"""
-        # Для каждого Пользователя и для каждой Роли:
-        for user in users:
-            for role in roles:
-                url = f"{self.roles_url}/{user}/roles"
-                # Если мы не запрашивали access token, то перезапрашиваем
-                if not self.superuser_access_token:
-                    await self._get_superuser_access_token()
-                # Формируем данные для запроса
-                headers = {"Authorization": f"Bearer {self.superuser_access_token}"}
-                payload = {"name": role, "date": str(dt.datetime.now().date())}
-                # Отправляем запрос
-                response = await self._send_async_request('delete', url, json=payload, headers=headers)
-                # Если Access Token потерял актуальность, то обновляем его и переотправляем запрос
-                if response.status == HTTPStatus.FORBIDDEN:
-                    await self._get_superuser_access_token()
-                    await self._send_async_request('delete', url, json=payload, headers=headers)
