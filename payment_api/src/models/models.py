@@ -9,10 +9,10 @@ class Payment(Base):
     __tablename__ = 'payments'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True)
-    user_id = sqlalchemy.Column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = sqlalchemy.Column(UUID(as_uuid=True), sqlalchemy.ForeignKey('users.id'), nullable=False, index=True)
     start_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
     end_date = sqlalchemy.Column(sqlalchemy.DATE, index=True)
-    subscription = sqlalchemy.Column(sqlalchemy.String, index=True)
+    subscription_id = sqlalchemy.Column(sqlalchemy.ForeignKey('subscriptions.id'), index=True)
     payment_url = sqlalchemy.Column(sqlalchemy.String)
     is_paid = sqlalchemy.Column(sqlalchemy.Boolean, index=True, default=False)
     intent_id = sqlalchemy.Column(sqlalchemy.String)
