@@ -4,6 +4,8 @@ from typing import Tuple
 from schema.payment import CancelReason, RefundReason
 from schema.product import Product
 
+api_client = None
+
 
 class EcomClient(ABC):
 
@@ -114,3 +116,7 @@ class EcomEventListener(ABC):
                 str: event ID.
         """
         pass
+
+
+def get_client() -> EcomClient:
+    return api_client

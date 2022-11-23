@@ -6,7 +6,7 @@ from fastapi.responses import ORJSONResponse
 
 from api.v1 import payments, subscriptions, refunds, webhook
 from core.config import settings
-from ecom import stripe_api, event_listeners
+from ecom import abstract, event_listeners, stripe_api
 
 sentry_sdk.init(
     dsn=settings.sentry.dsn,
@@ -23,7 +23,7 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    stripe_api.api_client = stripe_api.StripeClient(
+    abstract.api_client = stripe_api.StripeClient(
         secret_key=settings.stripe.secret_key.get_secret_value(),
         method_types=settings.payment.method_types,
         public_key=settings.stripe.public_key.get_secret_value(),
