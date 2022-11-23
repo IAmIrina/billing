@@ -52,8 +52,7 @@ class PaymentService(BaseService):
             select(models.Payment)
             .where(
                 models.Payment.user_id == user_id,
-                # FIXME закомментировал для отладки
-                # models.Payment.is_paid,
+                models.Payment.is_paid,
             )
             .offset(offset * limit)
             .limit(limit)
