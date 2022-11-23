@@ -14,7 +14,7 @@ GUEST_ROLE_NAME=guest
 LIMITER_CONFIG=5 per 1 minute
 
 # Redis Settings
-REDIS_HOST=auth_redis
+REDIS_HOST=redis
 REDIS_PORT=6379
 
 # Postgres Settings
