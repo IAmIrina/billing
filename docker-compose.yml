@@ -28,7 +28,7 @@ services:
     env_file:
       - .auth_env
 
-  auth_redis:
+  redis:
     image: redis:6.0.9
     restart: on-failure
 
@@ -43,7 +43,7 @@ services:
     volumes:
       - /tmp/logs/app/json:/var/log/app
     depends_on:
-      - auth_redis
+      - redis
       - auth_db
 
   payment-manager:
@@ -55,6 +55,18 @@ services:
       - payment_api
       - auth_api
 
+  scheduler:
+    build: ./scheduler/
+    depends_on:
+      - redis
+    env_file:
+      - ./scheduler/.env
+
 volumes:
   postgres_volume:
   postgres_data:
+
+networks:
+  default:
+    name: graduate_network
+    external: true
