@@ -29,13 +29,14 @@ class AuthSettings(DotEnvMixin):
 class PostgresSettings(DotEnvMixin):
     user: str = Field("postgres", env='POSTGRES_USER')
     password: str = Field("password", env='POSTGRES_PASSWORD')
-    host: str = Field("db", env='POSTGRES_HOST')
+    host: str = Field("localhost", env='POSTGRES_HOST')
     port: int = Field(5432, env='POSTGRES_PORT')
     db: str = Field("payments", env='POSTGRES_DB')
 
     @property
     def dsn(self):
         return f'postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}'
+
 
 class Settings(DotEnvMixin):
     """Класс, дающий доступ к разным категориям настроек"""
