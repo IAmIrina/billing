@@ -54,3 +54,8 @@ services:
 volumes:
   postgres_volume:
   postgres_data:
+
+networks:
+  default:
+    name: graduate_network
+    external: true
