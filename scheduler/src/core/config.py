@@ -20,5 +20,15 @@ class RedisSettings(MainSettings):
     port: int = Field(..., env='REDIS_PORT')
 
 
+class NotificationSettings(BaseSettings):
+    host: str = 'rabbit_api'
+    port: str = '8000'
+
+    @property
+    def dsn(self):
+        return f'http://{self.host}:{self.port}/api/v1/event'
+
+
 db_settings = PostgresSettings()
 redis_setting = RedisSettings()
+notification_setting = NotificationSettings()

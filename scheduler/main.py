@@ -1,6 +1,9 @@
+import json
+
+import requests
 from celery import Celery
 from celery.schedules import crontab
-from src.core.config import redis_setting
+from src.core.config import notification_setting, redis_setting
 from src.services.subscriptions import get_expiring_subscriptions
 
 celery = Celery('tasks', broker=f'redis://{redis_setting.host}:{redis_setting.port}')
@@ -9,18 +12,19 @@ celery = Celery('tasks', broker=f'redis://{redis_setting.host}:{redis_setting.po
 @celery.task
 def send_notifications():
     """
-    Предполагаем что есть ручка сервиса notifications для отправки уведомлений об окончании подписки
+    Отправка users_id в сервис notifications для отправки уведомлений об окончании подписки
     """
     expiring_subscriptions = get_expiring_subscriptions()
-    for row in expiring_subscriptions:
-        print(f'send message to user {row.user_id} about date {row.end_date}')
+    users_id = [data.user_id for data in expiring_subscriptions]
+    requests.post(notification_setting.dsn,
+                  data=json.dumps({'users': users_id, 'event': 'test', 'data': {}}))
     return 'done!'
 
 
 @celery.on_after_configure.connect
 def setup_scheduler_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        crontab(hour=19, minute=15),  # Время указывается по UTC
+        crontab(hour=19, minute=21),  # Время указывается по UTC
         send_notifications.s(),
         name='Send notifications about expiring subscriptions',
     )
