@@ -34,7 +34,7 @@ async def create_subscription(
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Subscription already registered")
 
 
-@router.put("/{title}", response_model=schemas.SubscriptionIn, summary="Change a subscription")
+@router.patch("/{title}", response_model=schemas.SubscriptionIn, summary="Change a subscription")
 @check_role()
 async def change_subscription(
         title: str,
