@@ -53,7 +53,7 @@ async def create_payment(
         product_data=ProductData(name=subscription.title, description=subscription.description)
     )
 
-    new_db_payment = await payment_service.add_new_payment(payment, product, user)
+    new_db_payment = await payment_service.add_new_payment(payment, product, user, subscription.id)
 
     if not settings.debug:
         return schemas.ClientSecret(data=new_db_payment.client_secret)
