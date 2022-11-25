@@ -38,13 +38,13 @@ class PaymentManager:
                         payment = await self._enricher.get_payment_info(event_data.data.payment_intent)
                         if event_data.type.name == 'payment_intent_succeeded':
                             await self._update_roles([payment.user_id], payment.subscription.roles, str(payment.end_date))
-                            self._notifier.send_notification([payment.user_id], 'subscription_done')
+                            # await self._notifier.send_notification([payment.user_id], 'subscription_done')
                         elif event_data.type.name == 'charge_refunded':
                             await self._update_roles(
                                 [payment.user_id], payment.subscription.roles,
                                 str(dt.datetime.now().date())
                             )
-                            self._notifier.send_notification([payment.user_id], 'subscription_canceled')
+                            # self._notifier.send_notification([payment.user_id], 'subscription_canceled')
                         await self.mark_event_as_completed(event.payment_system_id)
                         await self.mark_payment_as_paid(payment.intent_id)
             time.sleep(5)

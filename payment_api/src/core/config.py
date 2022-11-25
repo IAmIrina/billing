@@ -41,7 +41,7 @@ class StripeSecrets(DotEnvMixin):
 
 class SentrySettings(DotEnvMixin):
 
-    dsn: str
+    dsn: str = ""
     traces_sample_rate: float = 1.0
 
     class Config:

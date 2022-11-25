@@ -34,4 +34,5 @@ manager = PaymentManager(
 )
 
 if __name__ == "__main__":
+    logger.warning("Payment Manager Started")
     asyncio.run(manager.watch_events())

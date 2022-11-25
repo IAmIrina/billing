@@ -8,6 +8,8 @@ from src.services import user as user_service, role as role_service
 from src.services.jwt_service import check_role_jwt, auth
 from src.core.config import api_settings
 
+import logging
+
 
 users_route = APIBlueprint(
     name='users',
