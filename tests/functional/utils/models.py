@@ -16,3 +16,9 @@ class Subscription:
     description: str
     price: int
     roles: list[str]
+
+
+@dataclass
+class Payment:
+    subscription: str
+    start_date: str

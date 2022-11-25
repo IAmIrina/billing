@@ -6,6 +6,7 @@ class TestSettings(BaseSettings):
     fastapi_port: str = '8888'
 
     subscriptions_router_prefix: str = '/api/v1/subscriptions/'
+    payments_router_prefix: str = '/api/v1/payments/'
 
 
 test_settings = TestSettings()
