@@ -25,8 +25,7 @@ def validate_uuid(role_id):
 @roles_route.output(RoleOut(many=True))
 @roles_route.auth_required(auth)
 @check_role_jwt(api_settings.superuser_role_name)
-def get_roles(role_id):
-    validate_uuid(role_id)
+def get_roles():
     return role_service.get_roles_from_db()
 
 

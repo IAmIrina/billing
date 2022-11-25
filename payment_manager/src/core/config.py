@@ -6,8 +6,15 @@ class DotEnvMixin(BaseSettings):
         env_file = '.env'
 
 class NotificationSettings(DotEnvMixin):
+    """Настройки подключения к сервису Уведомлений"""
     """Настройки для связи с нашим сервисом Авторизации"""
-    notification_url: str = Field(..., env='NOTIFICATION_URL')
+    host: str = Field(..., env='NOTIFICATION_HOST')
+    port: str = Field(..., env='NOTIFICATION_PORT')
+    path: str = Field(..., env='NOTIFICATION_API_PATH')
+
+    @property
+    def notification_url(self):
+        return f"http://{self.host}:{self.port}{self.path}"
 
 
 class AuthSettings(DotEnvMixin):
