@@ -40,11 +40,6 @@ class AuthSettings(DotEnvMixin):
         """Получение полного пути к эндпоинту по авторизации Юзера"""
         return f"http://{self.auth_host}:{self.auth_port}{self.login_path}"
 
-    @property
-    def user_info_url(self):
-        """Получение полного пути к эндпоинту по работе с Ролями"""
-        return f"http://{self.auth_host}:{self.auth_port}{self.user_info_path}"
-
 
 class PostgresSettings(DotEnvMixin):
     user: str = Field("postgres", env='POSTGRES_USER')
