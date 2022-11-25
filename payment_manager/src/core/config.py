@@ -6,18 +6,8 @@ class DotEnvMixin(BaseSettings):
         env_file = '.env'
 
 class NotificationSettings(DotEnvMixin):
-    """Настройки подключения к сервису Уведомлений"""
     """Настройки для связи с нашим сервисом Авторизации"""
-    host: str = Field(..., env='NOTIFICATION_HOST')
-    port: str = Field(..., env='NOTIFICATION_PORT')
-    path: str = Field(..., env='NOTIFICATION_API_PATH')
-
-    payment_succeeded_event_name: str = Field(..., env='PAYMENT_SUCCEEDED_EVENT_NAME')
-    payment_canceled_event_name: str = Field(..., env='PAYMENT_CANCELED_EVENT_NAME')
-
-    @property
-    def notification_url(self):
-        return f"http://{self.host}:{self.port}{self.path}"
+    notification_url: str = Field(..., env='NOTIFICATION_URL')
 
 
 class AuthSettings(DotEnvMixin):
@@ -39,11 +29,6 @@ class AuthSettings(DotEnvMixin):
     def login_url(self):
         """Получение полного пути к эндпоинту по авторизации Юзера"""
         return f"http://{self.auth_host}:{self.auth_port}{self.login_path}"
-
-    @property
-    def user_info_url(self):
-        """Получение полного пути к эндпоинту по работе с Ролями"""
-        return f"http://{self.auth_host}:{self.auth_port}{self.user_info_path}"
 
 
 class PostgresSettings(DotEnvMixin):
