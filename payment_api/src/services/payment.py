@@ -27,13 +27,13 @@ class PaymentService(BaseService):
     async def get_payment(self, user_id, start_date, subscription):
         """Функция ищет оплаченный платеж пользователя по подписке с датой окончания больше,
          чем дата старта, указанная в аргументе"""
-
-        result = await self.session.execute(select(models.Payment).where(
-            models.Payment.user_id == user_id,
-            start_date < models.Payment.end_date,
-            models.Payment.subscription == subscription,
-            models.Payment.is_paid
-        ))
+        result = await self.session.execute(
+            select(models.Payment).join(models.Payment.subscription).where(
+                models.Payment.user_id == user_id,
+                start_date < models.Payment.end_date,
+                models.Subscription.title == subscription,
+                models.Payment.is_paid)
+        )
         return result.scalars().first()
 
     async def get_payment_by_intent_id(self, user_id, intent_id):
@@ -60,12 +60,12 @@ class PaymentService(BaseService):
         )
         return result.scalars().all()
 
-    async def create_payment(self, user_payment: schemas.UserPayment):
+    async def create_payment(self, user_payment: schemas.UserPayment, subscription):
         db_payment = models.Payment(
             user_id=user_payment.user_id,
             start_date=user_payment.start_date,
             end_date=user_payment.start_date + relativedelta(months=1, days=-1),
-            subscription=user_payment.subscription,
+            subscription_id=subscription,
             client_secret=user_payment.client_secret,
             intent_id=user_payment.intent_id,
         )
@@ -74,7 +74,7 @@ class PaymentService(BaseService):
         await self.session.refresh(db_payment)
         return db_payment
 
-    async def add_new_payment(self, payment: schemas.Payment, product: Product, user: schemas.User):
+    async def add_new_payment(self, payment: schemas.Payment, product: Product, user: schemas.User, subscription):
         db_user = await self.user_service.get_user(user.id)
         if not db_user:
             customer_id = await self.payment_system_client.create_customer(
@@ -102,7 +102,7 @@ class PaymentService(BaseService):
             **payment.dict()
         )
         # TODO записать сумму в базу
-        db_payment = await self.create_payment(user_payment)
+        db_payment = await self.create_payment(user_payment, subscription)
         return db_payment
 
     async def add_new_refund(self, payment_intent, idempotency_key, reason, amount=None):
