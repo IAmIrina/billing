@@ -7,7 +7,6 @@ class DotEnvMixin(BaseSettings):
 
 class NotificationSettings(DotEnvMixin):
     """Настройки подключения к сервису Уведомлений"""
-    """Настройки для связи с нашим сервисом Авторизации"""
     host: str = Field(..., env='NOTIFICATION_HOST')
     port: str = Field(..., env='NOTIFICATION_PORT')
     path: str = Field(..., env='NOTIFICATION_API_PATH')
