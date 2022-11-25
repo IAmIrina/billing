@@ -12,6 +12,9 @@ class NotificationSettings(DotEnvMixin):
     port: str = Field(..., env='NOTIFICATION_PORT')
     path: str = Field(..., env='NOTIFICATION_API_PATH')
 
+    payment_succeeded_event_name: str = Field(..., env='PAYMENT_SUCCEEDED_EVENT_NAME')
+    payment_canceled_event_name: str = Field(..., env='PAYMENT_CANCELED_EVENT_NAME')
+
     @property
     def notification_url(self):
         return f"http://{self.host}:{self.port}{self.path}"

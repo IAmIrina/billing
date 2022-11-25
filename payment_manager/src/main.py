@@ -22,7 +22,6 @@ updater = RoleUpdater(
 notifier = PaymentNotifier(
     notification_url=settings.notification.notification_url,
     login_url=settings.auth.login_url,
-    user_info_url=settings.auth.user_info_url,
     superuser_email=settings.auth.superuser_email,
     superuser_pass=settings.auth.superuser_password,
 )
@@ -30,9 +29,11 @@ manager = PaymentManager(
     auth_updater=updater,
     enricher=enricher,
     notifier=notifier,
+    payment_succeeded_event_name=settings.notification.payment_succeeded_event_name,
+    payment_canceled_event_name=settings.notification.payment_canceled_event_name,
     model_to_process=Event
 )
 
 if __name__ == "__main__":
-    logger.warning("Payment Manager Started")
+    logger.warning("Payment Manager had been started")
     asyncio.run(manager.watch_events())
