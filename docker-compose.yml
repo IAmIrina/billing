@@ -10,14 +10,13 @@ services:
       - .env
   
   payment_api:
+    container_name: payment_api
     build:
       context: ./payment_api
     env_file:
       - .env
     depends_on:
       - db
-    ports:
-      - 8090:8000
 
   auth_db:
     image: postgres:13.0-alpine
@@ -40,8 +39,6 @@ services:
     depends_on:
       - redis
       - auth_db
-    ports:
-      - 8999:8000
 
   payment-manager:
     container_name: payment-manager
@@ -60,17 +57,16 @@ services:
     env_file:
       - ./scheduler/.env
 
-#  nginx:
-#    container_name: nginx
-#    image: nginx:latest
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./configs:/etc/nginx/conf.d:ro
-#      - ./data:/data/:ro
-#    depends_on:
-#      - payment_api
-#    ports:
-#      - 8000:80
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - payment_api
+    ports:
+      - 80:80
 
 volumes:
   postgres_volume:
