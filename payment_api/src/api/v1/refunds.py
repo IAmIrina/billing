@@ -4,6 +4,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.responses import JSONResponse
 
+from api.v1 import error_descriptions as error_texts
 from api.v1 import schemas
 from schema.payment import RefundReason
 from services.auth import JWTBearer, check_role
@@ -32,7 +33,7 @@ async def create_refund(
         intent_id=payment.intent_id,
     )
     if not db_payment:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Payment not found or unpaid')
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=error_texts.no_payment)
 
     refund = await payment_service.add_new_refund(
         payment_intent=payment.intent_id,
