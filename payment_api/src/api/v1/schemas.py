@@ -2,12 +2,11 @@ from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel
-from typing import List
 
 
 class User(BaseModel):
     id: UUID
-    roles: List[str]
+    roles: list[str]
 
 
 class Payment(BaseModel):
@@ -26,7 +25,7 @@ class Pagination(BaseModel):
 
 class PaymentOutSchema(BaseModel):
     meta: Pagination
-    data: List[PaymentOut]
+    data: list[PaymentOut]
 
 
 class ClientSecret(BaseModel):
@@ -43,7 +42,7 @@ class SubscriptionIn(BaseModel):
     title: str
     description: str
     price: int
-    roles: List[str]
+    roles: list[str]
 
     class Config:
         orm_mode = True

@@ -1,7 +1,5 @@
 from enum import Enum
 
-from schema.mixins import OrjsonModel
-
 
 class RefundReason(Enum):
     duplicate = 'Duplicate'

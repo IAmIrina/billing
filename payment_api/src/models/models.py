@@ -21,7 +21,6 @@ class Payment(Base):
     subscription = relationship("Subscription", back_populates="payments", uselist=False, lazy="joined")
 
 
-
 class Subscription(Base):
     __tablename__ = 'subscriptions'
 
