@@ -24,7 +24,7 @@ def send_notifications():
 @celery.on_after_configure.connect
 def setup_scheduler_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        crontab(hour=19, minute=21),  # Время указывается по UTC
+        crontab(hour=10, minute=32),  # Время указывается по UTC
         send_notifications.s(),
         name='Send notifications about expiring subscriptions',
     )

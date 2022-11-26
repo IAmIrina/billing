@@ -34,27 +34,23 @@ class PaymentManager:
             if events:
                 for event in events:
                     logger.warning(f"There are uncompleted event: {event.payment_system_id}")
-                    if not event.data:
+                    event_data = await self.event_parser.parse(event.data)
+                    if not event_data:
                         await self.mark_event_as_completed(event.payment_system_id)
                     else:
-                        event_data = await self.event_parser.parse(event.data)
                         payment = await self._enricher.get_payment_info(event_data.data.payment_intent)
                         if event_data.type.name == 'payment_intent_succeeded':
-                            await self._update_roles([payment.user_id], payment.subscription.roles, str(payment.end_date))
+                            await self._auth_updater.add_roles([payment.user_id], payment.subscription.roles, str(payment.end_date))
                             await self._notifier.send_notification([payment.user_id], self.payment_succeeded_event_name)
                         elif event_data.type.name == 'charge_refunded':
-                            await self._update_roles(
+                            await self._auth_updater.delete_roles(
                                 [payment.user_id], payment.subscription.roles,
                                 str(dt.datetime.now().date())
                             )
-                            self._notifier.send_notification([payment.user_id], self.payment_canceled_event_name)
+                            await self._notifier.send_notification([payment.user_id], self.payment_canceled_event_name)
                         await self.mark_event_as_completed(event.payment_system_id)
                         await self.mark_payment_as_paid(payment.intent_id)
             time.sleep(sleep_time)
-
-    async def _update_roles(self, users: List[UUID], roles: List[UUID], expired_at: str) -> None:
-        """Изменяет Роли"""
-        await self._auth_updater.add_roles(users=users, roles=roles, expired_at=expired_at)
 
     async def mark_event_as_completed(self, id: str) -> None:
         """Помечает Оплату как завершенную"""
@@ -65,7 +61,3 @@ class PaymentManager:
         """Помечает Оплату как завершенную"""
         await self._enricher.mark_payment_as_completed(model=models.Payment, id=id, is_paid=True)
         logger.warning(f"Payment Management Completed on payment {id}")
-
-    def send_notifications(self) -> None:
-        """Отправляет Уведомления через сервис уведомлений"""
-        raise NotImplementedError

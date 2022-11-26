@@ -65,3 +65,18 @@ class RoleUpdater:
                 if response.status == HTTPStatus.FORBIDDEN:
                     await self._get_superuser_access_token()
                     await self._send_async_request('post', url, json=payload, headers=headers)
+
+    async def delete_roles(self, users: List[UUID], roles: List[str], expired_at: str) -> None:
+        """Позволяет разом удалить Роли списку Пользователей"""
+        for user in users:
+            for role in roles:
+                url = f"{self.roles_url}/{user}/roles"
+                if not self.superuser_access_token:
+                    await self._get_superuser_access_token()
+                headers = {"Authorization": f"Bearer {self.superuser_access_token}"}
+                payload = {"name": role, "date": expired_at}
+                response = await self._send_async_request('delete', url, json=payload, headers=headers)
+                logger.warning(f"HTTP Response: {response}")
+                if response.status == HTTPStatus.FORBIDDEN:
+                    await self._get_superuser_access_token()
+                    await self._send_async_request('delete', url, json=payload, headers=headers)

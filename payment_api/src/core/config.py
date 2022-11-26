@@ -53,14 +53,14 @@ class Settings(DotEnvMixin):
     project_name: str = 'Payment service'
     postgres: PostgresSettings = PostgresSettings()
     sentry: SentrySettings = SentrySettings()
-    jwt_secret: str = 'secret'
+    jwt_secret: str = '8b82efa703035a2bccaaeeb6d136ee8e59f1ef2c19fff57adaac7d20f7777473'
     jwt_algorithm: str = 'HS256'
     debug: bool = False
     secret_key: str = 'S#perS3crEt_9999'
     server_address: str = 'http://localhost:8000/'
     stripe: StripeSecrets = StripeSecrets()
     payment: PaymentSettings = PaymentSettings()
-    superuser_role_name: str = 'superadmin'
+    superuser_role_name: str = 'superuser'
 
     class Config:
         env_file_encoding = 'utf-8'
