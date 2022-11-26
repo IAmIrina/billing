@@ -18,10 +18,10 @@ from services.user import UserService, get_user_service
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory='templates')
 
 
-@router.post("/", response_model=schemas.ClientSecret, summary="Create a payment")
+@router.post('/', response_model=schemas.ClientSecret, summary='Create a payment')
 async def create_payment(
         request: Request,
         payment: schemas.Payment,
@@ -41,11 +41,11 @@ async def create_payment(
         start_date=payment.start_date
     )
     if db_payment:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Paid period is not yet over")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Paid period is not yet over')
 
     subscription = await subscription_service.get_subscription_by_title(payment.subscription)
     if not subscription:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Subscription not found")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Subscription not found')
 
     product = Product(
         unit_amount=subscription.price,
@@ -59,16 +59,16 @@ async def create_payment(
         return schemas.ClientSecret(data=new_db_payment.client_secret)
     else:
         return templates.TemplateResponse(
-            "checkout.html",
+            'checkout.html',
             {
-                "request": request,
+                'request': request,
                 'CLIENT_SECRET': new_db_payment.client_secret,
-                'SUBMIT_CAPTION': f"Pay {product.unit_amount / 100} {product.currency}"
+                'SUBMIT_CAPTION': f'Pay {product.unit_amount / 100} {product.currency}'
             }
         )
 
 
-@router.get("/", response_model=schemas.PaymentOutSchema, summary="Get paid payments")
+@router.get('/', response_model=schemas.PaymentOutSchema, summary='Get paid payments')
 async def get_paid_payments(
         user: schemas.User = Depends(JWTBearer()),
         paginator: Paginator = Depends(),
@@ -94,7 +94,7 @@ async def get_paid_payments(
     )
 
 
-@router.patch("/auto_payment", summary="Change auto payment")
+@router.patch('/auto_payment', summary='Change auto payment')
 async def change_auto_payment(
         auto_payment: AutoPayment,
         user: schemas.User = Depends(JWTBearer()),

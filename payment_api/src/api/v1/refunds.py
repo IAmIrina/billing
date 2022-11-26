@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/", summary="Create a refund")
+@router.post('/', summary='Create a refund')
 @check_role()
 async def create_refund(
         payment: schemas.PaymentIntent,
@@ -32,7 +32,7 @@ async def create_refund(
         intent_id=payment.intent_id,
     )
     if not db_payment:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Payment not found or unpaid")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Payment not found or unpaid')
 
     refund = await payment_service.add_new_refund(
         payment_intent=payment.intent_id,

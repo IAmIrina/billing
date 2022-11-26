@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/", response_model=schemas.WebhookResponse, summary="Webhook")
+@router.post('/', response_model=schemas.WebhookResponse, summary='Webhook')
 async def save_event(request: Request,
                      event_service: EventService = Depends(get_event_service),
                      ):
