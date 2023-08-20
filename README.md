@@ -1,11 +1,30 @@
-Ссылка на репо https://github.com/IAmIrina/billing
 
-# Проектная работа: диплом
+# Project work "Billing for Online cinema". 
+Yandex Praktikum:  Graduate work, teamwork.
 
-Продолжительность: 4 недели
-Тема: Биллинг для онлайн кинотеатра
+Billing service for "Online cinema" charges user accounts using https://stripe.com/ API, adds or removes subscriptions and notify users about changes.
 
-## PaymentManager
+Components:
+- Payment API allows charging user account using Stripe API and send information about transaction to queue of Payment Manager.
+- Payment Manager processes events from its queue and add or remove subscriptions and send data to Notification service to notify users about the changes.
+- Scheduler checks statuses of payments and removes overdue subscriptions or prolongs them.
 
-Это воркер, который занимается обработкой новых Ивентов. Если из Ивента мы понимаем, что была оплачена/возвращена подписка,
-то этот сервис обновляет Роли Пользователя и отправляет ему соответствующие уведомления.
+
+## Stack
+- FastAPI
+- Redis
+- Postgres
+- Alembic
+- Nginx
+
+
+## Dev API сервиса
+API of the service http://localhost:8090/api/openapi
+
+## Deploy
+
+1. Create file **.env** (use example **.env.example**)
+2. Run docker-compose
+```commandline
+docker-compose -f docker-compose.dev.yml up --build
+```
